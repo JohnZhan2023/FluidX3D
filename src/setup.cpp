@@ -3,13 +3,13 @@
 
 
 
-// INTERACTIVE_GRAPHICS, 
+// INTERACTIVE_GRAPHICS, EQUILIBRIUM_BOUNDARIES
 void main_setup() { 
 
     // --------------------------- 1. 定义物理量、网格及流动参数 ---------------------------
     // 示例：设定雷诺数 Re、特征尺寸 D（障碍物直径），来流速度 U_in
-    const float Re       = 10000.0f;   // 例：一万左右的雷诺数
-    const float D        = 50.0f;      // 圆柱直径（LBM长度单位）
+    const float Re       = 6000.0f;   // 例：一万左右的雷诺数
+    const float D        = 100.0f;      // 圆柱直径（LBM长度单位）
     const float U_in     = 0.05f;      // 入口速度（LBM速度单位，典型范围 ~0.001 - 0.1）
     // 由 Re = (U_in * D) / nu => nu = (U_in * D) / Re
     const float nu       = (U_in * D)/Re;
@@ -43,9 +43,9 @@ void main_setup() {
 
     // 障碍物圆柱的中心和方向（示例：圆柱轴方向与 z 轴平行）
     // 也可以改用 shapes.hpp 中的 cube(), cuboid() 等函数放置立方体
-    float3 cylinder_center = (float3)(0.5f * Nx, 0.5f * Ny, 0.5f * Nz);
-    float3 cylinder_axis   = (float3)(0.0f, 0.0f, 1.0f);
-    const float cylinder_radius = D * 0.5f;  // 圆柱半径
+    float3 obj_center = lbm.center();  // 风洞中心
+    float3 cylinder_axis   = float3(0u, Ny, 0u);  // 圆柱轴方向
+    const float cylinder_radius = D * 0.4f;  // 圆柱半径
 
     parallel_for(lbm.get_N(), [&](ulong n) {
         uint x=0u, y=0u, z=0u;
@@ -68,9 +68,10 @@ void main_setup() {
         //     下述演示做一个简单“速度”指定
         if(x == Nx_1) {
             lbm.flags[n] = TYPE_E;      // Equilibrium boundary
-            lbm.u.x[n]   = U_in;        // 也可设为更小，如 0.8f*U_in
-            lbm.u.y[n]   = 0.0f;
-            lbm.u.z[n]   = 0.0f;
+            // lbm.u.x[n]   = U_in;        // 也可设为更小，如 0.8f*U_in
+            // lbm.u.y[n]   = 0.0f;
+            // lbm.u.z[n]   = 0.0f;
+			lbm.rho[n]   = 1.0f;  // 或略低于 1.0f，模拟轻微的压力梯度
         }
 
         // （3）上、下、前、后边界: 刚性壁
@@ -83,25 +84,33 @@ void main_setup() {
         //     这里令圆柱轴与 z 方向平行，半径 = cylinder_radius
         //     注意此函数写法：cylinder(...) 第2个 float3 是轴向向量，你也可以写 Nx,0,0 等
         //     要根据 cylinder(...) 在 FluidX3D 的签名做调整
-        if( cylinder(
-                x, y, z,
-                cylinder_center,      // 圆柱中心
-                cylinder_axis,        // 圆柱轴方向
-                cylinder_radius
-           ) ) {
+        if(cylinder(x, y, z, obj_center, cylinder_axis, cylinder_radius)) {
             lbm.flags[n] = TYPE_S;     // 将圆柱设为固体壁面
         }
     });
 
     // --------------------------- 4. 设置可视化参数、运行模拟 ---------------------------
     // 这一步可根据喜好选择可视化模式
-    lbm.graphics.visualization_modes = VIS_FLAG_LATTICE | VIS_Q_CRITERION;
-    // 先初始化(拷贝CPU->GPU等)，再开始时间步推进
-    lbm.run(0u);           // 只做初始化
-    lbm.run(100000u);      // 例如，先跑 10 万步看看收敛情况
+    lbm.graphics.visualization_modes = VIS_FLAG_LATTICE | VIS_STREAMLINES;
+	// INTERACTIVE_GRAPHICS
+	lbm.run();
 
-    // 若需要循环中导出图片/数据，可参考官方文档，在循环中调用 lbm.run(lbm_dt)，
-    // 并在每次迭代后用 lbm.write_frame_buffer() 或其他方式输出可视化/数据。
+    // Render Video
+	const uint lbm_T = 10000u; // number of LBM time steps to simulate
+	lbm.run(0u, lbm_T); // initialize simulation
+	while(lbm.get_t()<lbm_T) { // main simulation loop
+		if(lbm.graphics.next_frame(lbm_T, 25.0f)) { // render enough frames for 25 seconds of 60fps video
+			// 设置相机位置在管道侧边，并正对管道
+			lbm.graphics.set_camera_free(
+				float3(0.5f * Lx, 0.5f * Ly, 2.5f * D),  // 相机位置（x, y, z）
+				0.0f,   // 相机朝向的偏航角度 (yaw)
+				0.0f,   // 相机朝向的俯仰角度 (pitch)
+				50.0f   // 相机视距
+			);
+			lbm.graphics.write_frame(get_exe_path()+"export/camera/"); // export image from camera position 
+		}
+		lbm.run(2u, lbm_T); // run 1 LBM time step
+	}
 }
 
 
