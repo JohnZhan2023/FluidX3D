@@ -1,14 +1,14 @@
 #include "setup.hpp"
-#include "io.h"
-
-
 
 // INTERACTIVE_GRAPHICS, EQUILIBRIUM_BOUNDARIES
 void main_setup() { 
+	const int object_id = 4; // 0: cylinder, 1: sphere
+	// 将整数转换为字符串
+	std::string object_id_str = std::to_string(object_id);
 
     // --------------------------- 1. 定义物理量、网格及流动参数 ---------------------------
     // 示例：设定雷诺数 Re、特征尺寸 D（障碍物直径），来流速度 U_in
-    const float Re       = 6000.0f;   // 例：一万左右的雷诺数
+    const float Re       = 4000.0f;   // 例：一万左右的雷诺数
     const float D        = 100.0f;      // 圆柱直径（LBM长度单位）
     const float U_in     = 0.05f;      // 入口速度（LBM速度单位，典型范围 ~0.001 - 0.1）
     // 由 Re = (U_in * D) / nu => nu = (U_in * D) / Re
@@ -30,6 +30,23 @@ void main_setup() {
     // --------------------------- 2. 创建 LBM 仿真对象 ---------------------------
     // 这里只用单GPU，且不施加额外体力 (fx=fy=fz=0.0f)
     LBM lbm(Nx, Ny, Nz, nu, 0.0f, 0.0f, 0.0f);
+	float3 obj_center = lbm.center();  // 风洞中心
+	// rotate 90 degrees around z axis
+	float3x3 rotation = float3x3(0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);  // 旋转矩阵
+	float size = float(D);  // 障碍物尺寸
+	const uchar flag = TYPE_S;  // 固体壁面标记
+
+	//----------------------------2.1 Import STL file----------------------------
+	// 读取 STL 文件，放置在风洞中央
+	if (object_id == 3){
+		lbm.voxelize_stl(get_exe_path()+"../stl/Dog_Singlecolor.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 4){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	
+
+
 
     // --------------------------- 3. 并行循环，设置初始 & 边界条件 ---------------------------
     //   - x=0 设为入口 (TYPE_E)，并给出速度 u=(U_in, 0, 0)
@@ -42,9 +59,7 @@ void main_setup() {
     const uint Nz_1 = Nz - 1;
 
     // 障碍物圆柱的中心和方向（示例：圆柱轴方向与 z 轴平行）
-    // 也可以改用 shapes.hpp 中的 cube(), cuboid() 等函数放置立方体
-    float3 obj_center = lbm.center();  // 风洞中心
-    float3 cylinder_axis   = float3(0u, Ny, 0u);  // 圆柱轴方向
+    float3 cylinder_axis   = float3(0.0f* Nx, 0.5f* Ny, 0.0f* Nz);  // 圆柱轴方向
     const float cylinder_radius = D * 0.4f;  // 圆柱半径
 
     parallel_for(lbm.get_N(), [&](ulong n) {
@@ -53,7 +68,6 @@ void main_setup() {
 
         // 默认初值：rho=1, u=0, flags=0 (流体内部)
         // 下面开始按需修改
-
         // （1）入口 (x=0): 指定速度边界
         if(x == 0u) {
             lbm.flags[n] = TYPE_E;      // 流体边界，使用Equilibrium boundary
@@ -75,43 +89,51 @@ void main_setup() {
         }
 
         // （3）上、下、前、后边界: 刚性壁
-        if(y == 0u || y == Ny_1 || z == 0u || z == Nz_1) {
-            lbm.flags[n] = TYPE_S;      // no-slip 边界
-        }
+        // if(y == 0u || y == Ny_1 || z == 0u || z == Nz_1) {
+        //     lbm.flags[n] = TYPE_S;      // no-slip 边界
+		// 	//set the transparent boundary
+
+        // }
 
         // （4）在通道中央放置一个圆柱形障碍物
         //     shapes.hpp 中的 cylinder() 判断点 (x,y,z) 是否在给定圆柱内
         //     这里令圆柱轴与 z 方向平行，半径 = cylinder_radius
         //     注意此函数写法：cylinder(...) 第2个 float3 是轴向向量，你也可以写 Nx,0,0 等
         //     要根据 cylinder(...) 在 FluidX3D 的签名做调整
-        if(cylinder(x, y, z, obj_center, cylinder_axis, cylinder_radius)) {
-            lbm.flags[n] = TYPE_S;     // 将圆柱设为固体壁面
-        }
+        if((object_id==0) && cylinder(x, y, z, obj_center, cylinder_axis, cylinder_radius)) {lbm.flags[n] = TYPE_S;}     // 将圆柱设为固体壁面
+        
+
     });
 
     // --------------------------- 4. 设置可视化参数、运行模拟 ---------------------------
     // 这一步可根据喜好选择可视化模式
-    lbm.graphics.visualization_modes = VIS_FLAG_LATTICE | VIS_STREAMLINES;
+    lbm.graphics.visualization_modes = VIS_STREAMLINES|VIS_FLAG_SURFACE;
 	// INTERACTIVE_GRAPHICS
-	lbm.run();
+	// lbm.run();
 
-    // Render Video
-	const uint lbm_T = 10000u; // number of LBM time steps to simulate
-	lbm.run(0u, lbm_T); // initialize simulation
+    //Render Video
+	const uint frequency = 20u; // number of frames per second
+	const uint star_T = 600u; // number of LBM time steps to simulate
+	const uint frames = 49; // number of LBM time steps to simulate
+	const uint lbm_T = star_T + frames*frequency; // number of LBM time steps to simulate
+	lbm.run(star_T, lbm_T); // initialize simulation
 	while(lbm.get_t()<lbm_T) { // main simulation loop
 		if(lbm.graphics.next_frame(lbm_T, 25.0f)) { // render enough frames for 25 seconds of 60fps video
 			// 设置相机位置在管道侧边，并正对管道
 			lbm.graphics.set_camera_free(
-				float3(0.5f * Lx, 0.5f * Ly, 2.5f * D),  // 相机位置（x, y, z）
-				0.0f,   // 相机朝向的偏航角度 (yaw)
+				float3(0.0f * Nx, -1.4f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
+				270.0f,   // 相机朝向的偏航角度 (yaw)
 				0.0f,   // 相机朝向的俯仰角度 (pitch)
 				50.0f   // 相机视距
 			);
-			lbm.graphics.write_frame(get_exe_path()+"export/camera/"); // export image from camera position 
+			// 生成完整的路径
+			std::string camera_path = "Video&Img/Image/" + object_id_str + "/";
+			// MAKE_DIR(camera_path);
+			lbm.graphics.write_frame(camera_path); // export image from camera position 
 		}
-		lbm.run(2u, lbm_T); // run 1 LBM time step
+		lbm.run(frequency, lbm_T); // run 1 LBM time step
 	}
-}
+}/**/ 
 
 
 
@@ -463,7 +485,7 @@ void main_setup() { // benchmark; required extensions in defines.hpp: BENCHMARK,
 		if(lbm.flags[n]!=TYPE_S) lbm.u.y[n] = u;
 		if(x==0u||x==Nx-1u||y==0u||y==Ny-1u||z==0u||z==Nz-1u) lbm.flags[n] = TYPE_E; // all non periodic
 	}); // ####################################################################### run simulation, export images and data ##########################################################################
-	lbm.graphics.visualization_modes = VIS_FLAG_SURFACE|VIS_Q_CRITERION;
+	lbm.graphics.visualization_modes = VIS_FLAG_SURFACE|VIS_STREAMLINES;
 	lbm.run();
 } /**/
 
