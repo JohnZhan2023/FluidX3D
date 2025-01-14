@@ -1,9 +1,114 @@
 #include "setup.hpp"
+#include "io.h"
+
+
+
+// INTERACTIVE_GRAPHICS, 
+void main_setup() { 
+
+    // --------------------------- 1. 定义物理量、网格及流动参数 ---------------------------
+    // 示例：设定雷诺数 Re、特征尺寸 D（障碍物直径），来流速度 U_in
+    const float Re       = 10000.0f;   // 例：一万左右的雷诺数
+    const float D        = 50.0f;      // 圆柱直径（LBM长度单位）
+    const float U_in     = 0.05f;      // 入口速度（LBM速度单位，典型范围 ~0.001 - 0.1）
+    // 由 Re = (U_in * D) / nu => nu = (U_in * D) / Re
+    const float nu       = (U_in * D)/Re;
+
+    // 定义风洞尺寸：假设长度方向 x 比较长，y、z 为高度、宽度
+    // 这里只是示例，你也可根据需要做得更大或更小
+    const float Lx = 10.0f * D;  // x 方向长度
+    const float Ly = 2.0f  * D;  // y 方向高度
+    const float Lz = 2.0f  * D;  // z 方向宽度
+
+    // 将浮点尺寸转为整数网格尺寸
+    // 例如想要 ~ 500 - 600 万个网格，总体积 Nx*Ny*Nz
+    // 简单示例：每个方向以 1 cell 对应 1 LBM长度单位
+    const uint Nx = (uint)ceil(Lx);
+    const uint Ny = (uint)ceil(Ly);
+    const uint Nz = (uint)ceil(Lz);
+
+    // --------------------------- 2. 创建 LBM 仿真对象 ---------------------------
+    // 这里只用单GPU，且不施加额外体力 (fx=fy=fz=0.0f)
+    LBM lbm(Nx, Ny, Nz, nu, 0.0f, 0.0f, 0.0f);
+
+    // --------------------------- 3. 并行循环，设置初始 & 边界条件 ---------------------------
+    //   - x=0 设为入口 (TYPE_E)，并给出速度 u=(U_in, 0, 0)
+    //   - x=Nx-1 设为出口 (TYPE_E)，并给出 rho != 1 或 速度=(接近0,0,0)
+    //   - y=0, y=Ny-1, z=0, z=Nz-1 设为刚性壁 (TYPE_S)
+    //   - 中间插入一个圆柱障碍物
+    // 也可把进口设为速度边界、出口设为压力边界 (rho=1.0 ± ∆p)
+    const uint Nx_1 = Nx - 1;
+    const uint Ny_1 = Ny - 1;
+    const uint Nz_1 = Nz - 1;
+
+    // 障碍物圆柱的中心和方向（示例：圆柱轴方向与 z 轴平行）
+    // 也可以改用 shapes.hpp 中的 cube(), cuboid() 等函数放置立方体
+    float3 cylinder_center = (float3)(0.5f * Nx, 0.5f * Ny, 0.5f * Nz);
+    float3 cylinder_axis   = (float3)(0.0f, 0.0f, 1.0f);
+    const float cylinder_radius = D * 0.5f;  // 圆柱半径
+
+    parallel_for(lbm.get_N(), [&](ulong n) {
+        uint x=0u, y=0u, z=0u;
+        lbm.coordinates(n, x, y, z);
+
+        // 默认初值：rho=1, u=0, flags=0 (流体内部)
+        // 下面开始按需修改
+
+        // （1）入口 (x=0): 指定速度边界
+        if(x == 0u) {
+            lbm.flags[n] = TYPE_E;      // 流体边界，使用Equilibrium boundary
+            lbm.u.x[n]   = U_in;        // 指定 x 方向来流
+            lbm.u.y[n]   = 0.0f;
+            lbm.u.z[n]   = 0.0f;
+        }
+
+        // （2）出口 (x=Nx-1)：可指定接近自由流出
+        //     方法 A：速度近似为 (U_in, 0, 0)，或更小
+        //     方法 B：指定密度 rho != 1
+        //     下述演示做一个简单“速度”指定
+        if(x == Nx_1) {
+            lbm.flags[n] = TYPE_E;      // Equilibrium boundary
+            lbm.u.x[n]   = U_in;        // 也可设为更小，如 0.8f*U_in
+            lbm.u.y[n]   = 0.0f;
+            lbm.u.z[n]   = 0.0f;
+        }
+
+        // （3）上、下、前、后边界: 刚性壁
+        if(y == 0u || y == Ny_1 || z == 0u || z == Nz_1) {
+            lbm.flags[n] = TYPE_S;      // no-slip 边界
+        }
+
+        // （4）在通道中央放置一个圆柱形障碍物
+        //     shapes.hpp 中的 cylinder() 判断点 (x,y,z) 是否在给定圆柱内
+        //     这里令圆柱轴与 z 方向平行，半径 = cylinder_radius
+        //     注意此函数写法：cylinder(...) 第2个 float3 是轴向向量，你也可以写 Nx,0,0 等
+        //     要根据 cylinder(...) 在 FluidX3D 的签名做调整
+        if( cylinder(
+                x, y, z,
+                cylinder_center,      // 圆柱中心
+                cylinder_axis,        // 圆柱轴方向
+                cylinder_radius
+           ) ) {
+            lbm.flags[n] = TYPE_S;     // 将圆柱设为固体壁面
+        }
+    });
+
+    // --------------------------- 4. 设置可视化参数、运行模拟 ---------------------------
+    // 这一步可根据喜好选择可视化模式
+    lbm.graphics.visualization_modes = VIS_FLAG_LATTICE | VIS_Q_CRITERION;
+    // 先初始化(拷贝CPU->GPU等)，再开始时间步推进
+    lbm.run(0u);           // 只做初始化
+    lbm.run(100000u);      // 例如，先跑 10 万步看看收敛情况
+
+    // 若需要循环中导出图片/数据，可参考官方文档，在循环中调用 lbm.run(lbm_dt)，
+    // 并在每次迭代后用 lbm.write_frame_buffer() 或其他方式输出可视化/数据。
+}
+
 
 
 
 #ifdef BENCHMARK
-#include "info.hpp"
+/*#include "info.hpp"
 void main_setup() { // benchmark; required extensions in defines.hpp: BENCHMARK, optionally FP16S or FP16C
 	// ################################################################## define simulation box size, viscosity and volume force ###################################################################
 	uint mlups = 0u; {
