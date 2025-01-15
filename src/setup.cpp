@@ -38,15 +38,39 @@ void main_setup() {
 
 	//----------------------------2.1 Import STL file----------------------------
 	// 读取 STL 文件，放置在风洞中央
-	if (object_id == 3){
+	if (object_id == 13){
 		lbm.voxelize_stl(get_exe_path()+"../stl/Dog_Singlecolor.stl", obj_center, rotation, size);
 	}
-	else if (object_id == 4){
+	else if (object_id == 14){
 		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
 	}
-	
-
-
+	else if (object_id == 15){
+		lbm.voxelize_stl(get_exe_path()+"../stl/crm-hl_reference_ldg.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 16){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 17){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 18){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 19){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 20){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 21){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 22){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 23){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
 
     // --------------------------- 3. 并行循环，设置初始 & 边界条件 ---------------------------
     //   - x=0 设为入口 (TYPE_E)，并给出速度 u=(U_in, 0, 0)
@@ -95,44 +119,156 @@ void main_setup() {
 
         // }
 
-        // （4）在通道中央放置一个圆柱形障碍物
-        //     shapes.hpp 中的 cylinder() 判断点 (x,y,z) 是否在给定圆柱内
-        //     这里令圆柱轴与 z 方向平行，半径 = cylinder_radius
-        //     注意此函数写法：cylinder(...) 第2个 float3 是轴向向量，你也可以写 Nx,0,0 等
-        //     要根据 cylinder(...) 在 FluidX3D 的签名做调整
-        if((object_id==0) && cylinder(x, y, z, obj_center, cylinder_axis, cylinder_radius)) {lbm.flags[n] = TYPE_S;}     // 将圆柱设为固体壁面
-        
+		// 根据 object_id 选择不同的形状函数并设置固体壁面标志
+		// 根据 object_id 选择不同的形状函数并设置固体壁面标志
+		switch(object_id) {
+			case 0: { // 圆柱形障碍物
+				if(cylinder(x, y, z, obj_center, cylinder_axis, cylinder_radius)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 1: { // 球体障碍物
+				if(sphere(x, y, z, obj_center, cylinder_radius)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 2: { // 椭球体障碍物
+				float3 ellipsoid_radii = float3(0.5f * D, 0.2f * D, 0.2f * D);  // 椭球体半径
+				if(ellipsoid(x, y, z, obj_center, ellipsoid_radii)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 3: { // 立方体障碍物
+				float cube_length = 0.5f * D;  // 立方体边长
+				if(cube(x, y, z, obj_center, cube_length)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 4: { // 圆锥形障碍物
+				float cone_radius1 = 0.5f * D;  // 圆锥底面半径
+				float cone_radius2 = 0.2f * D;  // 圆锥顶面半径
+				float3 cone_axis = float3(0.1f* Nx, 0.0f* Ny, 0.0f* Nz);  // 圆锥轴方向
+				if(cone(x, y, z, obj_center, cone_axis, cone_radius1, cone_radius2)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 5: { // 管道障碍物
+				float pipe_radius = 0.2f * D;  // 管道半径
+				if(pipe(x, y, z, obj_center, cylinder_axis, pipe_radius)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 6: { // 圆锥管道障碍物
+				float cone_radius1 = 0.5f * D;  // 圆锥底面半径
+				float cone_radius2 = 0.2f * D;  // 圆锥顶面半径
+				if(conepipe(x, y, z, obj_center, cylinder_axis, cone_radius1, cone_radius2)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 7: { // 长方体障碍物
+				float3 cuboid_lengths = float3(0.5f * D, 0.2f * D, 0.2f * D);  // 长方体边长
+				if(cuboid(x, y, z, obj_center, cuboid_lengths)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 8: { // 三角形障碍物
+				float3 p0 = obj_center + float3(0.0f, 0.0f, 0.0f);
+				float3 p1 = obj_center + float3(0.5f * D, 0.0f, 0.0f);
+				float3 p2 = obj_center + float3(0.0f, 0.5f * D, 0.0f);
+				if(triangle(x, y, z, p0, p1, p2)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 9: { // 平面障碍物
+				float3 plane_normal = float3(0.0f, 1.0f, 0.0f);  // 平面法向量
+				float3 plane_center = obj_center + float3(0.0f,0.5*D,0.5*D);  // 平面中心
+				if(plane(x, y, z, plane_center, plane_normal)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 10: { // X 轴方向的环面障碍物
+				float torus_r = 0.2f * D;  // 环面小半径
+				float torus_R = 0.5f * D;  // 环面大半径
+				if(torus_x(x, y, z, obj_center, torus_r, torus_R)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 11: { // Y 轴方向的环面障碍物
+				float torus_r = 0.2f * D;  // 环面小半径
+				float torus_R = 0.5f * D;  // 环面大半径
+				if(torus_y(x, y, z, obj_center, torus_r, torus_R)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 12: { // Z 轴方向的环面障碍物
+				float torus_r = 0.2f * D;  // 环面小半径
+				float torus_R = 0.5f * D;  // 环面大半径
+				if(torus_z(x, y, z, obj_center, torus_r, torus_R)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			default:
+				// 未定义的 object_id，不进行任何操作
+				break;
+		}
+
 
     });
 
     // --------------------------- 4. 设置可视化参数、运行模拟 ---------------------------
     // 这一步可根据喜好选择可视化模式
-    lbm.graphics.visualization_modes = VIS_STREAMLINES|VIS_FLAG_SURFACE;
+    lbm.graphics.visualization_modes = VIS_Q_CRITERION|VIS_FLAG_SURFACE;
 	// INTERACTIVE_GRAPHICS
-	// lbm.run();
+	lbm.run();
 
     //Render Video
-	const uint frequency = 20u; // number of frames per second
-	const uint star_T = 600u; // number of LBM time steps to simulate
-	const uint frames = 49; // number of LBM time steps to simulate
-	const uint lbm_T = star_T + frames*frequency; // number of LBM time steps to simulate
-	lbm.run(star_T, lbm_T); // initialize simulation
-	while(lbm.get_t()<lbm_T) { // main simulation loop
-		if(lbm.graphics.next_frame(lbm_T, 25.0f)) { // render enough frames for 25 seconds of 60fps video
-			// 设置相机位置在管道侧边，并正对管道
-			lbm.graphics.set_camera_free(
-				float3(0.0f * Nx, -1.4f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
-				270.0f,   // 相机朝向的偏航角度 (yaw)
-				0.0f,   // 相机朝向的俯仰角度 (pitch)
-				50.0f   // 相机视距
-			);
-			// 生成完整的路径
-			std::string camera_path = "Video&Img/Image/" + object_id_str + "/";
-			// MAKE_DIR(camera_path);
-			lbm.graphics.write_frame(camera_path); // export image from camera position 
-		}
-		lbm.run(frequency, lbm_T); // run 1 LBM time step
-	}
+	// const uint frequency = 20u; // number of frames per second
+	// const uint star_T = 600u; // number of LBM time steps to simulate
+	// const uint frames = 49; // number of LBM time steps to simulate
+	// const uint lbm_T = star_T + frames*frequency; // number of LBM time steps to simulate
+	// lbm.run(star_T, lbm_T); // initialize simulation
+	// while(lbm.get_t()<lbm_T) { // main simulation loop
+	// 	if(lbm.graphics.next_frame(lbm_T, 25.0f)) { // render enough frames for 25 seconds of 60fps video
+	// 		// 设置相机位置在管道侧边，并正对管道
+	// 		lbm.graphics.set_camera_free(
+	// 			float3(0.0f * Nx, -1.4f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
+	// 			270.0f,   // 相机朝向的偏航角度 (yaw)
+	// 			0.0f,   // 相机朝向的俯仰角度 (pitch)
+	// 			50.0f   // 相机视距
+	// 		);
+	// 		// 生成完整的路径
+	// 		std::string camera_path = "Video&Img/Image/" + object_id_str + "/";
+	// 		// MAKE_DIR(camera_path);
+	// 		lbm.graphics.write_frame(camera_path); // export image from camera position 
+	// 	}
+	// 	lbm.run(frequency, lbm_T); // run 1 LBM time step
+	// }
 }/**/ 
 
 
