@@ -1,10 +1,11 @@
 #include "setup.hpp"
+#include "setup.hpp"
+#include <vector>
+#include <string>
+#include <cmath>
+#include <iostream>
 
-// INTERACTIVE_GRAPHICS, EQUILIBRIUM_BOUNDARIES
-void main_setup() { 
-	const int object_id = 4; // 0: cylinder, 1: sphere
-	// 将整数转换为字符串
-	std::string object_id_str = std::to_string(object_id);
+void run_simulation(int object_id,std::string object_id_str, float3 axis_,float3x3 rotation) { 
 
     // --------------------------- 1. 定义物理量、网格及流动参数 ---------------------------
     // 示例：设定雷诺数 Re、特征尺寸 D（障碍物直径），来流速度 U_in
@@ -26,51 +27,56 @@ void main_setup() {
     const uint Nx = (uint)ceil(Lx);
     const uint Ny = (uint)ceil(Ly);
     const uint Nz = (uint)ceil(Lz);
+	float3 axis = axis_ * (Nx, Ny, Nz); //0, 4, 5, 6
 
     // --------------------------- 2. 创建 LBM 仿真对象 ---------------------------
     // 这里只用单GPU，且不施加额外体力 (fx=fy=fz=0.0f)
     LBM lbm(Nx, Ny, Nz, nu, 0.0f, 0.0f, 0.0f);
 	float3 obj_center = lbm.center();  // 风洞中心
-	// rotate 90 degrees around z axis
-	float3x3 rotation = float3x3(0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);  // 旋转矩阵
+
+	// float3x3 rotation = float3x3(0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);  // 旋转矩阵
 	float size = float(D);  // 障碍物尺寸
 	const uchar flag = TYPE_S;  // 固体壁面标记
 
 	//----------------------------2.1 Import STL file----------------------------
 	// 读取 STL 文件，放置在风洞中央
-	if (object_id == 13){
+	if (object_id == 12){
 		lbm.voxelize_stl(get_exe_path()+"../stl/Dog_Singlecolor.stl", obj_center, rotation, size);
 	}
-	else if (object_id == 14){
+	else if (object_id == 13){
 		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
 	}
-	else if (object_id == 15){
+	else if (object_id == 14){
 		lbm.voxelize_stl(get_exe_path()+"../stl/crm-hl_reference_ldg.stl", obj_center, rotation, size);
 	}
+	else if (object_id == 15){
+		lbm.voxelize_stl(get_exe_path()+"../stl/cat ring.stl", obj_center, rotation, size);
+	}
 	else if (object_id == 16){
-		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+		lbm.voxelize_stl(get_exe_path()+"../stl/CatFlexi.stl", obj_center, rotation, size);
 	}
 	else if (object_id == 17){
-		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+		lbm.voxelize_stl(get_exe_path()+"../stl/gong-gi.stl", obj_center, rotation, size);
 	}
 	else if (object_id == 18){
-		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+		lbm.voxelize_stl(get_exe_path()+"../stl/Octopus_spiral_v6.stl", obj_center, rotation, size);
 	}
 	else if (object_id == 19){
-		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+		lbm.voxelize_stl(get_exe_path()+"../stl/radiant_planter.stl", obj_center, rotation, size);
 	}
 	else if (object_id == 20){
-		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+		lbm.voxelize_stl(get_exe_path()+"../stl/radiant_plate.stl", obj_center, rotation, size);
 	}
 	else if (object_id == 21){
-		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+		lbm.voxelize_stl(get_exe_path()+"../stl/Shark_v2.0_A.stl", obj_center, rotation, size);
 	}
 	else if (object_id == 22){
-		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+		lbm.voxelize_stl(get_exe_path()+"../stl/SKODA_ENYAQ_FL_COUPE_S24_WHEEL_C5W_R21_20241220.stl", obj_center, rotation, size);
 	}
 	else if (object_id == 23){
-		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+		lbm.voxelize_stl(get_exe_path()+"../stl/zorro_chibi2fix.stl", obj_center, rotation, size);
 	}
+
 
     // --------------------------- 3. 并行循环，设置初始 & 边界条件 ---------------------------
     //   - x=0 设为入口 (TYPE_E)，并给出速度 u=(U_in, 0, 0)
@@ -81,10 +87,6 @@ void main_setup() {
     const uint Nx_1 = Nx - 1;
     const uint Ny_1 = Ny - 1;
     const uint Nz_1 = Nz - 1;
-
-    // 障碍物圆柱的中心和方向（示例：圆柱轴方向与 z 轴平行）
-    float3 cylinder_axis   = float3(0.0f* Nx, 0.5f* Ny, 0.0f* Nz);  // 圆柱轴方向
-    const float cylinder_radius = D * 0.4f;  // 圆柱半径
 
     parallel_for(lbm.get_N(), [&](ulong n) {
         uint x=0u, y=0u, z=0u;
@@ -123,14 +125,16 @@ void main_setup() {
 		// 根据 object_id 选择不同的形状函数并设置固体壁面标志
 		switch(object_id) {
 			case 0: { // 圆柱形障碍物
-				if(cylinder(x, y, z, obj_center, cylinder_axis, cylinder_radius)) {
+				const float cylinder_radius = D * 0.4f;  // 圆柱半径
+				if(cylinder(x, y, z, obj_center, axis, cylinder_radius)) {
 					lbm.flags[n] = TYPE_S;
 				}
 				break;
 			}
 			
 			case 1: { // 球体障碍物
-				if(sphere(x, y, z, obj_center, cylinder_radius)) {
+				const float radius = D * 0.5f;  // 球体半径
+				if(sphere(x, y, z, obj_center, radius)) {
 					lbm.flags[n] = TYPE_S;
 				}
 				break;
@@ -155,8 +159,7 @@ void main_setup() {
 			case 4: { // 圆锥形障碍物
 				float cone_radius1 = 0.5f * D;  // 圆锥底面半径
 				float cone_radius2 = 0.2f * D;  // 圆锥顶面半径
-				float3 cone_axis = float3(0.1f* Nx, 0.0f* Ny, 0.0f* Nz);  // 圆锥轴方向
-				if(cone(x, y, z, obj_center, cone_axis, cone_radius1, cone_radius2)) {
+				if(cone(x, y, z, obj_center, axis, cone_radius1, cone_radius2)) {
 					lbm.flags[n] = TYPE_S;
 				}
 				break;
@@ -164,7 +167,7 @@ void main_setup() {
 			
 			case 5: { // 管道障碍物
 				float pipe_radius = 0.2f * D;  // 管道半径
-				if(pipe(x, y, z, obj_center, cylinder_axis, pipe_radius)) {
+				if(pipe(x, y, z, obj_center, axis, pipe_radius)) {
 					lbm.flags[n] = TYPE_S;
 				}
 				break;
@@ -173,7 +176,7 @@ void main_setup() {
 			case 6: { // 圆锥管道障碍物
 				float cone_radius1 = 0.5f * D;  // 圆锥底面半径
 				float cone_radius2 = 0.2f * D;  // 圆锥顶面半径
-				if(conepipe(x, y, z, obj_center, cylinder_axis, cone_radius1, cone_radius2)) {
+				if(conepipe(x, y, z, obj_center, axis, cone_radius1, cone_radius2)) {
 					lbm.flags[n] = TYPE_S;
 				}
 				break;
@@ -197,16 +200,7 @@ void main_setup() {
 				break;
 			}
 			
-			case 9: { // 平面障碍物
-				float3 plane_normal = float3(0.0f, 1.0f, 0.0f);  // 平面法向量
-				float3 plane_center = obj_center + float3(0.0f,0.5*D,0.5*D);  // 平面中心
-				if(plane(x, y, z, plane_center, plane_normal)) {
-					lbm.flags[n] = TYPE_S;
-				}
-				break;
-			}
-			
-			case 10: { // X 轴方向的环面障碍物
+			case 9: { // X 轴方向的环面障碍物
 				float torus_r = 0.2f * D;  // 环面小半径
 				float torus_R = 0.5f * D;  // 环面大半径
 				if(torus_x(x, y, z, obj_center, torus_r, torus_R)) {
@@ -215,7 +209,7 @@ void main_setup() {
 				break;
 			}
 			
-			case 11: { // Y 轴方向的环面障碍物
+			case 10: { // Y 轴方向的环面障碍物
 				float torus_r = 0.2f * D;  // 环面小半径
 				float torus_R = 0.5f * D;  // 环面大半径
 				if(torus_y(x, y, z, obj_center, torus_r, torus_R)) {
@@ -224,7 +218,7 @@ void main_setup() {
 				break;
 			}
 			
-			case 12: { // Z 轴方向的环面障碍物
+			case 11: { // Z 轴方向的环面障碍物
 				float torus_r = 0.2f * D;  // 环面小半径
 				float torus_R = 0.5f * D;  // 环面大半径
 				if(torus_z(x, y, z, obj_center, torus_r, torus_R)) {
@@ -243,33 +237,95 @@ void main_setup() {
 
     // --------------------------- 4. 设置可视化参数、运行模拟 ---------------------------
     // 这一步可根据喜好选择可视化模式
-    lbm.graphics.visualization_modes = VIS_Q_CRITERION|VIS_FLAG_SURFACE;
+    lbm.graphics.visualization_modes = VIS_Q_CRITERION|VIS_FLAG_SURFACE|VIS_FLAG_LATTICE;
 	// INTERACTIVE_GRAPHICS
-	lbm.run();
+	// lbm.run();
 
     //Render Video
-	// const uint frequency = 20u; // number of frames per second
-	// const uint star_T = 600u; // number of LBM time steps to simulate
-	// const uint frames = 49; // number of LBM time steps to simulate
-	// const uint lbm_T = star_T + frames*frequency; // number of LBM time steps to simulate
-	// lbm.run(star_T, lbm_T); // initialize simulation
-	// while(lbm.get_t()<lbm_T) { // main simulation loop
-	// 	if(lbm.graphics.next_frame(lbm_T, 25.0f)) { // render enough frames for 25 seconds of 60fps video
-	// 		// 设置相机位置在管道侧边，并正对管道
-	// 		lbm.graphics.set_camera_free(
-	// 			float3(0.0f * Nx, -1.4f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
-	// 			270.0f,   // 相机朝向的偏航角度 (yaw)
-	// 			0.0f,   // 相机朝向的俯仰角度 (pitch)
-	// 			50.0f   // 相机视距
-	// 		);
-	// 		// 生成完整的路径
-	// 		std::string camera_path = "Video&Img/Image/" + object_id_str + "/";
-	// 		// MAKE_DIR(camera_path);
-	// 		lbm.graphics.write_frame(camera_path); // export image from camera position 
-	// 	}
-	// 	lbm.run(frequency, lbm_T); // run 1 LBM time step
-	// }
+	const uint frequency = 20u; // number of frames per second
+	const uint star_T = 600u; // number of LBM time steps to simulate
+	const uint frames = 49; // number of LBM time steps to simulate
+	const uint lbm_T = star_T + frames*frequency; // number of LBM time steps to simulate
+	lbm.run(star_T, lbm_T); // initialize simulation
+	while(lbm.get_t()<lbm_T) { // main simulation loop
+		if(lbm.graphics.next_frame(lbm_T, 25.0f)) { // render enough frames for 25 seconds of 60fps video
+			// 设置相机位置在管道侧边，并正对管道
+			lbm.graphics.set_camera_free(
+				float3(0.0f * Nx, -1.4f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
+				270.0f,   // 相机朝向的偏航角度 (yaw)
+				0.0f,   // 相机朝向的俯仰角度 (pitch)
+				50.0f   // 相机视距
+			);
+			// 生成完整的路径
+			std::string camera_path = "Video&Img/Image/" + object_id_str + "/";
+			// MAKE_DIR(camera_path);
+			lbm.graphics.write_frame(camera_path); // export image from camera position 
+		}
+		lbm.run(frequency, lbm_T); // run 1 LBM time step
+	}
 }/**/ 
+
+
+// INTERACTIVE_GRAPHICS, EQUILIBRIUM_BOUNDARIES
+
+void main_setup() {
+	print("the rendering without twisting");
+	for (int object_id = 0; object_id < 23; object_id++){
+		std::string object_id_str = std::to_string(object_id);
+		float3 axis = float3(0.0f, 0.5f, 0.0f);
+		float3x3 rotation = float3x3(0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+		run_simulation(object_id, object_id_str, axis, rotation);
+	}
+	print("the rendering with twisting0");
+	for (int object_id = 12; object_id<23; object_id++){
+		std::string object_id_str = std::to_string(object_id) + "_twist";
+		float3 axis = float3(0.0f, 0.5f, 0.0f);
+		float theta = M_PI / 5.0f;  
+		float cos_theta = cos(theta);
+		float sin_theta = sin(theta);
+		float3x3 rotation = float3x3(
+			cos_theta, -sin_theta, 0.0f,
+			sin_theta, cos_theta,  0.0f,
+			0.0f,      0.0f,       1.0f
+		);
+		run_simulation(object_id, object_id_str, axis, rotation);
+	}
+	print("the rendering with twisting1");
+	for (int object_id = 12; object_id<23; object_id++){
+		std::string object_id_str = std::to_string(object_id) + "_twist1";
+		float3 axis = float3(0.0f, 0.5f, 0.0f);
+		float theta = M_PI / 5.0f;  
+		float cos_theta = cos(theta);
+		float sin_theta = sin(theta);
+		float3x3 rotation = float3x3(
+			cos_theta,  0.0f, sin_theta,
+			0.0f,       1.0f, 0.0f,
+			-sin_theta, 0.0f, cos_theta
+		);
+		run_simulation(object_id, object_id_str, axis, rotation);
+	}
+	print("the rendering with twisting2");
+	for (int object_id = 12; object_id<23; object_id++){
+		std::string object_id_str = std::to_string(object_id) + "_twist2";
+		float3 axis = float3(0.0f, 0.5f, 0.0f);
+		float theta = M_PI / 5.0f;  
+		float cos_theta = cos(theta);
+		float sin_theta = sin(theta);
+		float3x3 rotation = float3x3(
+			1.0f, 0.0f,       0.0f,
+			0.0f, cos_theta, -sin_theta,
+			0.0f, sin_theta,  cos_theta
+		);
+		run_simulation(object_id, object_id_str, axis, rotation);
+	}
+	print("the rendering with twisting3");
+	float3 axis = float3(0.0f, 0.5f, 0.0f);
+	float3x3 rotation = float3x3(0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+	run_simulation(0, "0_twist", axis, rotation);
+	run_simulation(4, "4_twist", axis, rotation);
+	run_simulation(5, "5_twist", axis, rotation);
+	run_simulation(6, "6_twist", axis, rotation);
+}
 
 
 
