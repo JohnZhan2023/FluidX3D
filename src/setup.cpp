@@ -257,7 +257,7 @@ void run_simulation(int object_id,std::string object_id_str, float3 axis_,float3
 				50.0f   // 相机视距
 			);
 			// 生成完整的路径
-			std::string camera_path = "Video&Img/Image/" + object_id_str + "/";
+			std::string camera_path = "Video&Img/images/" + object_id_str + "/";
 			// MAKE_DIR(camera_path);
 			lbm.graphics.write_frame(camera_path); // export image from camera position 
 		}
@@ -266,9 +266,10 @@ void run_simulation(int object_id,std::string object_id_str, float3 axis_,float3
 }/**/ 
 
 
+
 // INTERACTIVE_GRAPHICS, EQUILIBRIUM_BOUNDARIES
 
-void main_setup() {
+/*void main_setup() {
 	print("the rendering without twisting");
 	for (int object_id = 0; object_id < 23; object_id++){
 		std::string object_id_str = std::to_string(object_id);
@@ -325,10 +326,288 @@ void main_setup() {
 	run_simulation(4, "4_twist", axis, rotation);
 	run_simulation(5, "5_twist", axis, rotation);
 	run_simulation(6, "6_twist", axis, rotation);
-}
+}/**/ 
 
 
+// INTERACTIVE_GRAPHICS, EQUILIBRIUM_BOUNDARIES
+void main_setup() { 
+	const int object_id = 0; // 0: cylinder, 1: sphere
+	// 将整数转换为字符串
+	std::string object_id_str = std::to_string(object_id);
 
+    // --------------------------- 1. 定义物理量、网格及流动参数 ---------------------------
+    // 示例：设定雷诺数 Re、特征尺寸 D（障碍物直径），来流速度 U_in
+    const float Re       = 4000.0f;   // 例：一万左右的雷诺数
+    const float D        = 100.0f;      // 圆柱直径（LBM长度单位）
+    const float U_in     = 0.05f;      // 入口速度（LBM速度单位，典型范围 ~0.001 - 0.1）
+    // 由 Re = (U_in * D) / nu => nu = (U_in * D) / Re
+    const float nu       = (U_in * D)/Re;
+
+    // 定义风洞尺寸：假设长度方向 x 比较长，y、z 为高度、宽度
+    // 这里只是示例，你也可根据需要做得更大或更小
+    const float Lx = 10.0f * D;  // x 方向长度
+    const float Ly = 2.0f  * D;  // y 方向高度
+    const float Lz = 2.0f  * D;  // z 方向宽度
+
+    // 将浮点尺寸转为整数网格尺寸
+    // 例如想要 ~ 500 - 600 万个网格，总体积 Nx*Ny*Nz
+    // 简单示例：每个方向以 1 cell 对应 1 LBM长度单位
+	
+    const uint Nx = (uint)ceil(Lx);
+    const uint Ny = (uint)ceil(Ly);
+    const uint Nz = (uint)ceil(Lz);
+
+    // --------------------------- 2. 创建 LBM 仿真对象 ---------------------------
+    // 这里只用单GPU，且不施加额外体力 (fx=fy=fz=0.0f)
+    LBM lbm(Nx, Ny, Nz, nu, 0.0f, 0.0f, 0.0f);
+	float3 obj_center = lbm.center();  // 风洞中心
+	// rotate 90 degrees around z axis
+	float theta = M_PI / 5.0f;  
+	float cos_theta = cos(theta);
+	float sin_theta = sin(theta);
+	float3x3 rotation = float3x3(
+			1.0f, 0.0f,       0.0f,
+			0.0f, cos_theta, -sin_theta,
+			0.0f, sin_theta,  cos_theta
+		);
+	// float3x3 rotation = float3x3(0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);  // 旋转矩阵
+	float size = float(D);  // 障碍物尺寸
+	const uchar flag = TYPE_S;  // 固体壁面标记
+
+	//----------------------------2.1 Import STL file----------------------------
+	// 读取 STL 文件，放置在风洞中央
+	if (object_id == 13){
+		lbm.voxelize_stl(get_exe_path()+"../stl/Dog_Singlecolor.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 14){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 15){
+		lbm.voxelize_stl(get_exe_path()+"../stl/crm-hl_reference_ldg.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 16){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 17){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 18){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 19){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 20){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 21){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 22){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+	else if (object_id == 23){
+		lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
+	}
+
+    // --------------------------- 3. 并行循环，设置初始 & 边界条件 ---------------------------
+    //   - x=0 设为入口 (TYPE_E)，并给出速度 u=(U_in, 0, 0)
+    //   - x=Nx-1 设为出口 (TYPE_E)，并给出 rho != 1 或 速度=(接近0,0,0)
+    //   - y=0, y=Ny-1, z=0, z=Nz-1 设为刚性壁 (TYPE_S)
+    //   - 中间插入一个圆柱障碍物
+    // 也可把进口设为速度边界、出口设为压力边界 (rho=1.0 ± ∆p)
+    const uint Nx_1 = Nx - 1;
+    const uint Ny_1 = Ny - 1;
+    const uint Nz_1 = Nz - 1;
+
+    // 障碍物圆柱的中心和方向（示例：圆柱轴方向与 z 轴平行）
+    float3 cylinder_axis   = float3(0.1f* Nx, 0.3f* Ny, -0.1f* Nz);  // 圆柱轴方向
+    const float cylinder_radius = D * 0.4f;  // 圆柱半径
+
+    parallel_for(lbm.get_N(), [&](ulong n) {
+        uint x=0u, y=0u, z=0u;
+        lbm.coordinates(n, x, y, z);
+
+        // 默认初值：rho=1, u=0, flags=0 (流体内部)
+        // 下面开始按需修改
+        // （1）入口 (x=0): 指定速度边界
+        if(x == 0u) {
+            lbm.flags[n] = TYPE_E;      // 流体边界，使用Equilibrium boundary
+            lbm.u.x[n]   = U_in;        // 指定 x 方向来流
+            lbm.u.y[n]   = 0.0f;
+            lbm.u.z[n]   = 0.0f;
+        }
+
+        // （2）出口 (x=Nx-1)：可指定接近自由流出
+        //     方法 A：速度近似为 (U_in, 0, 0)，或更小
+        //     方法 B：指定密度 rho != 1
+        //     下述演示做一个简单“速度”指定
+        if(x == Nx_1) {
+            lbm.flags[n] = TYPE_E;      // Equilibrium boundary
+            // lbm.u.x[n]   = U_in;        // 也可设为更小，如 0.8f*U_in
+            // lbm.u.y[n]   = 0.0f;
+            // lbm.u.z[n]   = 0.0f;
+			lbm.rho[n]   = 1.0f;  // 或略低于 1.0f，模拟轻微的压力梯度
+        }
+
+        // （3）上、下、前、后边界: 刚性壁
+        // if(y == 0u || y == Ny_1 || z == 0u || z == Nz_1) {
+        //     lbm.flags[n] = TYPE_S;      // no-slip 边界
+		// 	//set the transparent boundary
+
+        // }
+
+		// 根据 object_id 选择不同的形状函数并设置固体壁面标志
+		// 根据 object_id 选择不同的形状函数并设置固体壁面标志
+		switch(object_id) {
+			case 0: { // 圆柱形障碍物
+				if(cylinder(x, y, z, obj_center, cylinder_axis, cylinder_radius)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 1: { // 球体障碍物
+				if(sphere(x, y, z, obj_center, cylinder_radius)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 2: { // 椭球体障碍物
+				float3 ellipsoid_radii = float3(0.5f * D, 0.2f * D, 0.2f * D);  // 椭球体半径
+				if(ellipsoid(x, y, z, obj_center, ellipsoid_radii)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 3: { // 立方体障碍物
+				float cube_length = 0.5f * D;  // 立方体边长
+				if(cube(x, y, z, obj_center, cube_length)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 4: { // 圆锥形障碍物
+				float cone_radius1 = 0.5f * D;  // 圆锥底面半径
+				float cone_radius2 = 0.2f * D;  // 圆锥顶面半径
+				float3 cone_axis = float3(0.1f* Nx, 0.0f* Ny, 0.0f* Nz);  // 圆锥轴方向
+				if(cone(x, y, z, obj_center, cone_axis, cone_radius1, cone_radius2)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 5: { // 管道障碍物
+				float pipe_radius = 0.2f * D;  // 管道半径
+				if(pipe(x, y, z, obj_center, cylinder_axis, pipe_radius)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 6: { // 圆锥管道障碍物
+				float cone_radius1 = 0.5f * D;  // 圆锥底面半径
+				float cone_radius2 = 0.2f * D;  // 圆锥顶面半径
+				if(conepipe(x, y, z, obj_center, cylinder_axis, cone_radius1, cone_radius2)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 7: { // 长方体障碍物
+				float3 cuboid_lengths = float3(0.5f * D, 0.2f * D, 0.2f * D);  // 长方体边长
+				if(cuboid(x, y, z, obj_center, cuboid_lengths)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 8: { // 三角形障碍物
+				float3 p0 = obj_center + float3(0.0f, 0.0f, 0.0f);
+				float3 p1 = obj_center + float3(0.5f * D, 0.0f, 0.0f);
+				float3 p2 = obj_center + float3(0.0f, 0.5f * D, 0.0f);
+				if(triangle(x, y, z, p0, p1, p2)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 9: { // 平面障碍物
+				float3 plane_normal = float3(0.0f, 1.0f, 0.0f);  // 平面法向量
+				float3 plane_center = obj_center + float3(0.0f,0.5*D,0.5*D);  // 平面中心
+				if(plane(x, y, z, plane_center, plane_normal)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 10: { // X 轴方向的环面障碍物
+				float torus_r = 0.2f * D;  // 环面小半径
+				float torus_R = 0.5f * D;  // 环面大半径
+				if(torus_x(x, y, z, obj_center, torus_r, torus_R)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 11: { // Y 轴方向的环面障碍物
+				float torus_r = 0.2f * D;  // 环面小半径
+				float torus_R = 0.5f * D;  // 环面大半径
+				if(torus_y(x, y, z, obj_center, torus_r, torus_R)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			case 12: { // Z 轴方向的环面障碍物
+				float torus_r = 0.2f * D;  // 环面小半径
+				float torus_R = 0.5f * D;  // 环面大半径
+				if(torus_z(x, y, z, obj_center, torus_r, torus_R)) {
+					lbm.flags[n] = TYPE_S;
+				}
+				break;
+			}
+			
+			default:
+				// 未定义的 object_id，不进行任何操作
+				break;
+		}
+
+
+    });
+
+    // --------------------------- 4. 设置可视化参数、运行模拟 ---------------------------
+    // 这一步可根据喜好选择可视化模式
+    lbm.graphics.visualization_modes = VIS_Q_CRITERION|VIS_FLAG_SURFACE|VIS_FLAG_LATTICE;
+	// INTERACTIVE_GRAPHICS
+	// lbm.run();
+
+    //Render Video
+	const uint frequency = 20u; // number of frames per second
+	const uint star_T = 600u; // number of LBM time steps to simulate
+	const uint frames = 49; // number of LBM time steps to simulate
+	const uint lbm_T = star_T + frames*frequency; // number of LBM time steps to simulate
+	lbm.run(star_T, lbm_T); // initialize simulation
+	while(lbm.get_t()<lbm_T) { // main simulation loop
+		if(lbm.graphics.next_frame(lbm_T, 25.0f)) { // render enough frames for 25 seconds of 60fps video
+			// 设置相机位置在管道侧边，并正对管道
+			lbm.graphics.set_camera_free(
+				float3(0.0f * Nx, -1.4f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
+				270.0f,   // 相机朝向的偏航角度 (yaw)
+				0.0f,   // 相机朝向的俯仰角度 (pitch)
+				50.0f   // 相机视距
+			);
+			// 生成完整的路径
+			std::string camera_path = "Val_Video&Img/images/" + object_id_str + "/";
+			// MAKE_DIR(camera_path);
+			lbm.graphics.write_frame(camera_path); // export image from camera position 
+		}
+		lbm.run(frequency, lbm_T); // run 1 LBM time step
+	}
+}/**/ 
 
 #ifdef BENCHMARK
 /*#include "info.hpp"

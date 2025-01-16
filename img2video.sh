@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 定义图片和视频的根目录
-IMG_ROOT="Video&Img/Image"
-VIDEO_ROOT="Video&Img/Video"
+IMG_ROOT="Val_Video&Img/images"
+VIDEO_ROOT="Val_Video&Img/videos"
 
 # 确保视频根目录存在
 mkdir -p "$VIDEO_ROOT"
