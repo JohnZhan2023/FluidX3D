@@ -1,0 +1,10 @@
+bin/
+temp/
+stl/
+.vs/
+FluidX3D.vcxproj.user
+data/*
+Video&Img/*
+Val_Video&Img/*
+data/*
+SynData/*
