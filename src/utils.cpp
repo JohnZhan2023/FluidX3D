@@ -127,7 +127,7 @@ string id2object(int id, float3 rotation_angle, LBM & lbm, float size) {
 }
 
 void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
-    string original_path = "/viscam/projects/neural_wind_tunnel/EXP/data_generation/"
+    string original_path = "/viscam/projects/neural_wind_tunnel/EXP/data_generation/";
 
     uint star_T = 10000u; // number of LBM time steps to simulate
 	const uint frames = 49; // number of LBM time steps to simulate
@@ -189,7 +189,7 @@ void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
 
 
 void run_simulation(float si_u, int id, float3 rotation, float size, bool is_train, bool render = true) {
-    const uint3 lbm_N = resolution(float3(1.0f, 2.0f, 1.0f), 20000u); // input: simulation box aspect ratio and VRAM occupation in MB, output: grid resolution
+    const uint3 lbm_N = resolution(float3(1.0f, 2.0f, 1.0f), 4000u); // input: simulation box aspect ratio and VRAM occupation in MB, output: grid resolution
 	const float si_length = 2.4f;
 	// const float si_T = 10.0f;
 	const float si_nu=1.48E-5f, si_rho=1.225f;

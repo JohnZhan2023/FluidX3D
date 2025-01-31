@@ -12,14 +12,14 @@
 
 void main_setup() {
 	// ################################################################## define simulation box size, viscosity and volume force ###################################################################
-	const float si_u = 0.09f;
+	const float si_u = 10.0f;
 	// #########################################################################################################################################################################################
 	// for (int object_id = 12; object_id < 24; object_id++){
 	// 	run_simulation(si_u, object_id, float3(0.0f, 0.0f, 0.0f), 1.0f, true);
 	// }
 	float theta = M_PI / 8;
 	auto start = std::chrono::high_resolution_clock::now();
-	run_simulation(si_u, 19, float3(theta, theta, 0.0f), 0.8f, false, true);
+	run_simulation(si_u, 24, float3(theta, theta, 0.0f), 0.8f, false, false);
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> elapsed = end - start;
 	// print out the time
