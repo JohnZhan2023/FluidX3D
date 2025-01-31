@@ -127,9 +127,9 @@ string id2object(int id, float3 rotation_angle, LBM & lbm, float size) {
 }
 
 void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
-    string original_path = "/viscam/projects/neural_wind_tunnel/EXP/data_generation/"
+    string original_path = "C:\\Users\\86177\\Desktop\\workspace\\EXP\\data_generation\\";
 
-    uint star_T = 10000u; // number of LBM time steps to simulate
+    const uint star_T = 1000u; // number of LBM time steps to simulate
 	const uint frames = 49; // number of LBM time steps to simulate
 	const uint lbm_T = star_T + frames*frequency; // number of LBM time steps to simulate
 	
@@ -148,7 +148,7 @@ void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
     // save the first frame
     lbm.run(0, lbm_T); // initialize simulation
     lbm.graphics.set_camera_free(
-    float3(1.8f * Nx, 0.0f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
+    float3(((float)Nz/Nx) * Nx, 0.0f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
     0.0f,   // 相机朝向的偏航角度 (yaw)
     0.0f,   // 相机朝向的俯仰角度 (pitch)
     50.0f   // 相机视距
@@ -160,7 +160,7 @@ void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
 		if(lbm.graphics.next_frame(lbm_T, 25.0f)) { // render enough frames for 25 seconds of 60fps video
 			// 设置相机位置在管道侧边，并正对管道
 			lbm.graphics.set_camera_free(
-				float3(1.8f * Nx, 0.0f * Ny, 0.0f * Nz), // 相机位置（x, y, z）
+				float3(((float)Nz/Nx) * Nx, 0.0f * Ny, 0.0f * Nz), // 相机位置（x, y, z）
 				0.0f,   // 相机朝向的偏航角度 (yaw)
 				0.0f,   // 相机朝向的俯仰角度 (pitch)
 				50.0f   // 相机视距
@@ -189,7 +189,7 @@ void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
 
 
 void run_simulation(float si_u, int id, float3 rotation, float size, bool is_train, bool render = true) {
-    const uint3 lbm_N = resolution(float3(1.0f, 2.0f, 1.0f), 20000u); // input: simulation box aspect ratio and VRAM occupation in MB, output: grid resolution
+    const uint3 lbm_N = resolution(float3(0.01f, 2.0f, 1.0f), 1000u); // input: simulation box aspect ratio and VRAM occupation in MB, output: grid resolution
 	const float si_length = 2.4f;
 	// const float si_T = 10.0f;
 	const float si_nu=1.48E-5f, si_rho=1.225f;
@@ -202,7 +202,7 @@ void run_simulation(float si_u, int id, float3 rotation, float size, bool is_tra
     // initialize the LBM object
 	LBM lbm(lbm_N, lbm_nu);
     const uint Nx=lbm.get_Nx(), Ny=lbm.get_Ny(), Nz=lbm.get_Nz();
-    size = size * Nx;
+    size = size * Nz;
     string prompt = id2object(id, rotation, lbm, size);
 
     // find the boundary location
@@ -217,7 +217,13 @@ void run_simulation(float si_u, int id, float3 rotation, float size, bool is_tra
     // set the Visualize flag
     lbm.graphics.visualization_modes = VIS_Q_CRITERION|VIS_FLAG_SURFACE;
     if (render){
-        create_dataset(20, is_train, lbm, prompt);
+
+        float dt = units.si_t(1ul); // 1 LBM步对应的真实时间，单位是秒
+        print_info("dt = " + std::to_string(dt));
+        int frequency = (int)((1/24.0)/dt);
+        // int frequency = 1;
+        print_info("frequency = " + std::to_string(frequency));
+        create_dataset(frequency, is_train, lbm, prompt);
     }else{
         lbm.run();
     }
