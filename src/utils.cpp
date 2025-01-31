@@ -148,7 +148,7 @@ void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
     // save the first frame
     lbm.run(0, lbm_T); // initialize simulation
     lbm.graphics.set_camera_free(
-    float3(((float)Nz/Nx) * Nx, 0.0f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
+    float3(((float)Nz/Nx) * Nx * 1.2f, 0.0f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
     0.0f,   // 相机朝向的偏航角度 (yaw)
     0.0f,   // 相机朝向的俯仰角度 (pitch)
     50.0f   // 相机视距
@@ -160,7 +160,7 @@ void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
 		if(lbm.graphics.next_frame(lbm_T, 25.0f)) { // render enough frames for 25 seconds of 60fps video
 			// 设置相机位置在管道侧边，并正对管道
 			lbm.graphics.set_camera_free(
-				float3(((float)Nz/Nx) * Nx, 0.0f * Ny, 0.0f * Nz), // 相机位置（x, y, z）
+				float3(((float)Nz/Nx) * Nx * 1.2f, 0.0f * Ny, 0.0f * Nz), // 相机位置（x, y, z）
 				0.0f,   // 相机朝向的偏航角度 (yaw)
 				0.0f,   // 相机朝向的俯仰角度 (pitch)
 				50.0f   // 相机视距
