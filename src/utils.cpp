@@ -190,7 +190,7 @@ string id2object(int id, float3 rotation_angle, LBM & lbm, float size) {
 }
 
 void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
-    string original_path = "/viscam/projects/neural_wind_tunnel/EXP/data_generation/";
+    string original_path = "./";
     // string original_path = "C:\\Users\\86177\\Desktop\\workspace\\EXP\\data_generation\\";
 
     const uint star_T = 10000u; // number of LBM time steps to simulate
@@ -212,7 +212,7 @@ void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
     // save the first frame
     lbm.run(0, lbm_T); // initialize simulation
     lbm.graphics.set_camera_free(
-    float3(((float)Nz/Nx) * Nx * 1.8f, 0.0f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
+    float3(((float)Nz/Nx) * Nx * 1.9f, 0.0f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
     0.0f,   // 相机朝向的偏航角度 (yaw)
     0.0f,   // 相机朝向的俯仰角度 (pitch)
     50.0f   // 相机视距
@@ -224,7 +224,7 @@ void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
 		if(lbm.graphics.next_frame(lbm_T, 25.0f)) { // render enough frames for 25 seconds of 60fps video
 			// 设置相机位置在管道侧边，并正对管道
 			lbm.graphics.set_camera_free(
-				float3(((float)Nz/Nx) * Nx * 2.2f, 0.0f * Ny, 0.0f * Nz), // 相机位置（x, y, z）
+				float3(((float)Nz/Nx) * Nx * 1.9f, 0.0f * Ny, 0.0f * Nz), // 相机位置（x, y, z）
 				0.0f,   // 相机朝向的偏航角度 (yaw)
 				0.0f,   // 相机朝向的俯仰角度 (pitch)
 				50.0f   // 相机视距
@@ -284,7 +284,7 @@ void run_simulation(float si_u, int id, float3 rotation, float size, bool is_tra
 
         float dt = units.si_t(1ul); // 1 LBM步对应的真实时间，单位是秒
         print_info("dt = " + std::to_string(dt));
-        float slow_down = 15.0f; 
+        float slow_down = 20.0f; 
         int frequency = (int)((1/24.0)/dt/slow_down); // 24fps
         // int frequency = 1;
         print_info("frequency = " + std::to_string(frequency));

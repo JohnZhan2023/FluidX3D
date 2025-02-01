@@ -5,6 +5,7 @@
 #include <iostream>
 #include <chrono>
 #include "utils.hpp"
+#include "utils.cpp"
 
 // # define M_PI 3.14159265358979323846  /* pi */
 
@@ -18,13 +19,13 @@ void main_setup() {
 	// for (int object_id = 0; object_id < 38; object_id++){
 	// 	run_simulation(si_u, object_id, float3(0.0f, 0.0f, 0.0f), 0.8f, true, true);
 	// }
-	// float theta = 0;
-	// auto start = std::chrono::high_resolution_clock::now();
-	// run_simulation(si_u, 12, float3(theta, theta, 0.0f), 0.8f, false, true);
-	// auto end = std::chrono::high_resolution_clock::now();
-	// std::chrono::duration<double> elapsed = end - start;
-	// // print out the time
-	// std::cout << "Time: " << elapsed.count() << "s\n";
+	float theta = 0;
+	auto start = std::chrono::high_resolution_clock::now();
+	run_simulation(si_u, 11, float3(theta, theta, 0.0f), 0.8f, false, false);
+	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> elapsed = end - start;
+	// print out the time
+	std::cout << "Time: " << elapsed.count() << "s\n";
 }/**/ 
 
 
