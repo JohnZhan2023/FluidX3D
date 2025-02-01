@@ -26,93 +26,156 @@ string id2object(int id, float3 rotation_angle, LBM & lbm, float size) {
     // set the shape name based on the id
     switch(id) {
         case 0:
-            shape_name = "cylinder";
-            break;
-        case 1:
-            shape_name = "sphere";
-        
-            break;
-        case 2:
-            shape_name = "ellipsoid";
-            break;
-        case 3:
-            shape_name = "cube";
-            break;
-        case 4:
-            shape_name = "cone";
-            break;
-        case 5:
-            shape_name = "pipe";
-            break;
-        case 6:
-            shape_name = "cone pipe";
-            break;
-        case 7:
-            shape_name = "cuboid";
-            break;
-        case 8:
-            shape_name = "triangle";
-            break;
-        case 9:
-            shape_name = "torus (X axis)";
-            break;
-        case 10:
-            shape_name = "torus (Y axis)";
-            break;
-        case 11:
-            shape_name = "torus (Z axis)";
-            break;
-        case 12:
             shape_name = "dog";
             lbm.voxelize_stl(get_exe_path()+"../stl/Dog_Singlecolor.stl", obj_center, rotation, size);
             break;
-        case 13:
+        case 1:
             shape_name = "shark";
             lbm.voxelize_stl(get_exe_path()+"../stl/jeff_the_land_shark.stl", obj_center, rotation, size);
             break;
-        case 14:
+        case 2:
             shape_name = "landing gear";
             lbm.voxelize_stl(get_exe_path()+"../stl/crm-hl_reference_ldg.stl", obj_center, rotation, size);
             break;
-        case 15:
+        case 3:
             shape_name = "cat ring";
             lbm.voxelize_stl(get_exe_path()+"../stl/cat ring.stl", obj_center, rotation, size);
             break;
-        case 16:
+        case 4:
             shape_name = "flexible cat";
             lbm.voxelize_stl(get_exe_path()+"../stl/CatFlexi.stl", obj_center, rotation, size);
             break;
-        case 17:
+        case 5:
             shape_name = "gong-gi";
             lbm.voxelize_stl(get_exe_path()+"../stl/gong-gi.stl", obj_center, rotation, size);
             break;
-        case 18:
+        case 6:
             shape_name = "octopus";
             lbm.voxelize_stl(get_exe_path()+"../stl/Octopus_spiral_v6.stl", obj_center, rotation, size);
             break;
-        case 19:
+        case 7:
             shape_name = "planter";
             lbm.voxelize_stl(get_exe_path()+"../stl/radiant_planter.stl", obj_center, rotation, size);
             break;
-        case 20:
+        case 8:
             shape_name = "plate";
             lbm.voxelize_stl(get_exe_path()+"../stl/radiant_plate.stl", obj_center, rotation, size);
             break;
-        case 21:
+        case 9:
             shape_name = "shark v2.0";
             lbm.voxelize_stl(get_exe_path()+"../stl/Shark_v2.0_A.stl", obj_center, rotation, size);
             break;
-        case 22:
+        case 10:
             shape_name = "car wheel SKODA";
             lbm.voxelize_stl(get_exe_path()+"../stl/SKODA_ENYAQ_FL_COUPE_S24_WHEEL_C5W_R21_20241220.stl", obj_center, rotation, size);
             break;
-        case 23:
+        case 11:
             shape_name = "Zorro character";
             lbm.voxelize_stl(get_exe_path()+"../stl/zorro_chibi2fix.stl", obj_center, rotation, size);
             break;
-        case 24:
+        case 12:
             shape_name = "Cow";
             lbm.voxelize_stl(get_exe_path()+"../stl/Cow_t.stl", obj_center, rotation, size);
+            break;
+        case 13:
+            shape_name = "cone_0";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/cone_0.stl", obj_center, rotation, size);
+            break;
+        case 14:
+            shape_name = "cone_1";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/cone_1.stl", obj_center, rotation, size);
+            break;
+        case 15:
+            shape_name = "cone_2";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/cone_2.stl", obj_center, rotation, size);
+            break;
+        case 16:    
+            shape_name = "cone_3";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/cone_3.stl", obj_center, rotation, size);
+            break;
+        case 17:
+            shape_name = "cube_0";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/cube_0.stl", obj_center, rotation, size);
+            break;
+        case 18:
+            shape_name = "cube_1";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/cube_1.stl", obj_center, rotation, size);
+            break;
+        case 19:
+            shape_name = "cube_2";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/cube_2.stl", obj_center, rotation, size);
+            break;
+        case 20:
+            shape_name = "cube_3";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/cube_3.stl", obj_center, rotation, size);
+            break;
+        case 21:
+            shape_name = "cylinder_0";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/cylinder_0.stl", obj_center, rotation, size);
+            break;
+        case 22:
+            shape_name = "cylinder_1";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/cylinder_1.stl", obj_center, rotation, size);
+            break;
+        case 23:    
+            shape_name = "cylinder_2";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/cylinder_2.stl", obj_center, rotation, size);
+            break;
+        case 24:
+            shape_name = "cylinder_3";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/cylinder_3.stl", obj_center, rotation, size);
+            break;
+        case 25:    
+            shape_name = "ellipsoid_0";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/sphere_0.stl", obj_center, rotation, size);
+            break;
+        case 26:
+            shape_name = "ellipsoid_1";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/sphere_1.stl", obj_center, rotation, size);
+            break;
+        case 27:
+            shape_name = "ellipsoid_2";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/sphere_2.stl", obj_center, rotation, size);
+            break;
+        case 28:
+            shape_name = "rectangular_0";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/rectangular_0.stl", obj_center, rotation, size);
+            break;
+        case 29:
+            shape_name = "rectangular_1";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/rectangular_1.stl", obj_center, rotation, size);
+            break;
+        case 30:
+            shape_name = "rectangular_2";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/rectangular_2.stl", obj_center, rotation, size);
+            break;
+        case 31:
+            shape_name = "sphere_0";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/sphere_0.stl", obj_center, rotation, size);
+            break;
+        case 32:
+            shape_name = "sphere_1";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/sphere_1.stl", obj_center, rotation, size);
+            break;
+        case 33:
+            shape_name = "sphere_2";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/sphere_2.stl", obj_center, rotation, size);
+            break;
+        case 34:
+            shape_name = "sphere_3";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/sphere_3.stl", obj_center, rotation, size);
+            break;
+        case 35:
+            shape_name = "torus_0";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/torus_0.stl", obj_center, rotation, size);
+            break;
+        case 36:
+            shape_name = "torus_1";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/torus_1.stl", obj_center, rotation, size);
+            break;
+        case 37:
+            shape_name = "torus_2";
+            lbm.voxelize_stl(get_exe_path()+"../generated_stl/torus_2.stl", obj_center, rotation, size);
             break;
         default:
             shape_name = "unknown object";
@@ -128,8 +191,9 @@ string id2object(int id, float3 rotation_angle, LBM & lbm, float size) {
 
 void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
     string original_path = "/viscam/projects/neural_wind_tunnel/EXP/data_generation/";
+    // string original_path = "C:\\Users\\86177\\Desktop\\workspace\\EXP\\data_generation\\";
 
-    uint star_T = 10000u; // number of LBM time steps to simulate
+    const uint star_T = 10000u; // number of LBM time steps to simulate
 	const uint frames = 49; // number of LBM time steps to simulate
 	const uint lbm_T = star_T + frames*frequency; // number of LBM time steps to simulate
 	
@@ -148,7 +212,7 @@ void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
     // save the first frame
     lbm.run(0, lbm_T); // initialize simulation
     lbm.graphics.set_camera_free(
-    float3(1.8f * Nx, 0.0f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
+    float3(((float)Nz/Nx) * Nx * 1.8f, 0.0f * Ny, 0.0f * Nz),  // 相机位置（x, y, z）
     0.0f,   // 相机朝向的偏航角度 (yaw)
     0.0f,   // 相机朝向的俯仰角度 (pitch)
     50.0f   // 相机视距
@@ -160,7 +224,7 @@ void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
 		if(lbm.graphics.next_frame(lbm_T, 25.0f)) { // render enough frames for 25 seconds of 60fps video
 			// 设置相机位置在管道侧边，并正对管道
 			lbm.graphics.set_camera_free(
-				float3(1.8f * Nx, 0.0f * Ny, 0.0f * Nz), // 相机位置（x, y, z）
+				float3(((float)Nz/Nx) * Nx * 2.2f, 0.0f * Ny, 0.0f * Nz), // 相机位置（x, y, z）
 				0.0f,   // 相机朝向的偏航角度 (yaw)
 				0.0f,   // 相机朝向的俯仰角度 (pitch)
 				50.0f   // 相机视距
@@ -189,7 +253,7 @@ void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
 
 
 void run_simulation(float si_u, int id, float3 rotation, float size, bool is_train, bool render = true) {
-    const uint3 lbm_N = resolution(float3(1.0f, 2.0f, 1.0f), 4000u); // input: simulation box aspect ratio and VRAM occupation in MB, output: grid resolution
+    const uint3 lbm_N = resolution(float3(0.01f, 2.0f, 1.0f), 1000u); // input: simulation box aspect ratio and VRAM occupation in MB, output: grid resolution
 	const float si_length = 2.4f;
 	// const float si_T = 10.0f;
 	const float si_nu=1.48E-5f, si_rho=1.225f;
@@ -202,7 +266,7 @@ void run_simulation(float si_u, int id, float3 rotation, float size, bool is_tra
     // initialize the LBM object
 	LBM lbm(lbm_N, lbm_nu);
     const uint Nx=lbm.get_Nx(), Ny=lbm.get_Ny(), Nz=lbm.get_Nz();
-    size = size * Nx;
+    size = size * Nz;
     string prompt = id2object(id, rotation, lbm, size);
 
     // find the boundary location
@@ -217,7 +281,14 @@ void run_simulation(float si_u, int id, float3 rotation, float size, bool is_tra
     // set the Visualize flag
     lbm.graphics.visualization_modes = VIS_Q_CRITERION|VIS_FLAG_SURFACE;
     if (render){
-        create_dataset(20, is_train, lbm, prompt);
+
+        float dt = units.si_t(1ul); // 1 LBM步对应的真实时间，单位是秒
+        print_info("dt = " + std::to_string(dt));
+        float slow_down = 15.0f; 
+        int frequency = (int)((1/24.0)/dt/slow_down); // 24fps
+        // int frequency = 1;
+        print_info("frequency = " + std::to_string(frequency));
+        create_dataset(frequency, is_train, lbm, prompt);
     }else{
         lbm.run();
     }
