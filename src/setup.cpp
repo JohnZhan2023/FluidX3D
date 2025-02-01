@@ -31,7 +31,13 @@
 void main_setup(){
 	
 	float si_u = 100.00f;
-	run_simulation_2d(si_u, 1, 0.8f, true, true);
+	// for (int object_id = 0; object_id < 37; object_id++){
+	// 	run_simulation_2d(si_u, object_id, 0.8f, true, true);
+	// }
+	// // for the validation set
+
+	run_simulation_2d(si_u, 37, 0.8f, false, true);
+	
 
 }
 

@@ -184,7 +184,7 @@ string id2object(int id, float3 rotation_angle, LBM & lbm, float size) {
 
 	// construct the prompt
     string twist_info = std::to_string(int(rotation_angle.x*100)) + ", " + std::to_string(int(rotation_angle.y*100)) + ", " + std::to_string(int(rotation_angle.z*100));
-	string prompt = "(" + twist_info + "; " + shape_name + ")" + " Visualize the Q-criterion of the " + shape_name + " to represent the turbulent flow field of the object in the given image.";
+	string prompt = "(" + twist_info + "; " + shape_name + ")" + " Visualize the VIS_FIELD of the " + shape_name + " to represent the turbulent 2D flow field of the object in the given image.";
 
 	return prompt;
 }
@@ -318,9 +318,9 @@ void create_dataset_2d(uint frequency,bool is_train, LBM &lbm, string prompt){
     // save the first frame
     lbm.run(0, lbm_T); // initialize simulation
     lbm.graphics.set_camera_free(
-    float3(0.0f * Nx, 0.0f * Ny, ((float)Nx/Nz) * Nz * 1.8f),  // 相机位置（x, y, z）
+    float3(0.0f * Nx, 0.0f * Ny, ((float)Nx/Nz) * Nz * 1.2f),  // 相机位置（x, y, z）
     0.0f,   // 相机朝向的偏航角度 (yaw)
-    0.0f,   // 相机朝向的俯仰角度 (pitch)
+    90.0f,   // 相机朝向的俯仰角度 (pitch)
     50.0f   // 相机视距
     );
     lbm.graphics.write_frame(original_path + "SynData_2D/" + folder + "/images/" + object_id_str + "-"); // export image from camera position
@@ -330,9 +330,9 @@ void create_dataset_2d(uint frequency,bool is_train, LBM &lbm, string prompt){
 		if(lbm.graphics.next_frame(lbm_T, 25.0f)) { // render enough frames for 25 seconds of 60fps video
 			// 设置相机位置在管道侧边，并正对管道
 			lbm.graphics.set_camera_free(
-				float3(0.0f * Nx, 0.0f * Ny, ((float)Nx/Nz) * Nz * 1.8f),  // 相机位置（x, y, z）
+				float3(0.0f * Nx, 0.0f * Ny, ((float)Nx/Nz) * Nz * 1.2f),  // 相机位置（x, y, z）
 				0.0f,   // 相机朝向的偏航角度 (yaw)
-				0.0f,   // 相机朝向的俯仰角度 (pitch)
+				90.0f,   // 相机朝向的俯仰角度 (pitch)
 				50.0f   // 相机视距
 			);
 			// 生成完整的路径

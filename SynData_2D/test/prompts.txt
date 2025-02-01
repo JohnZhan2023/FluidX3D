@@ -1,0 +1,2 @@
+(0, 0, 0; torus_2) Visualize the VIS_FIELD of the torus_2 to represent the turbulent 2D flow field of the object in the given image.
+(0, 0, 0; torus_2) Visualize the VIS_FIELD of the torus_2 to represent the turbulent 2D flow field of the object in the given image.

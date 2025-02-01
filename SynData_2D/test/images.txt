@@ -1,0 +1,2 @@
+images/0, 0, 0; torus_2-image-000000000.png
+images/0, 0, 0; torus_2-image-000000000.png
