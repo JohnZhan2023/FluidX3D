@@ -2,8 +2,8 @@ import os
 import ffmpeg
 
 # 设置输入文件夹和输出文件夹
-input_dir = "/viscam/projects/neural_wind_tunnel/EXP/data_generation/SynData/test/images"
-output_dir = "/viscam/projects/neural_wind_tunnel/EXP/data_generation/SynData/test/videos"
+input_dir = "C:\\Users\\86177\\Desktop\\workspace\\FluidX3D\\SynData\\test\\images\\0, 0, 0; Zorro character"
+output_dir = ""
 
 # 确保输出目录存在
 os.makedirs(output_dir, exist_ok=True)

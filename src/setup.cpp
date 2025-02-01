@@ -12,21 +12,29 @@
 
 // INTERACTIVE_GRAPHICS, EQUILIBRIUM_BOUNDARIES
 
-void main_setup() {
+/*void main_setup() {
 	// ################################################################## define simulation box size, viscosity and volume force ###################################################################
-	const float si_u = 10.00f;
+	const float si_u = 1000.00f;
 	// #########################################################################################################################################################################################
 	// for (int object_id = 0; object_id < 38; object_id++){
 	// 	run_simulation(si_u, object_id, float3(0.0f, 0.0f, 0.0f), 0.8f, true, true);
 	// }
 	float theta = 0;
 	auto start = std::chrono::high_resolution_clock::now();
-	run_simulation(si_u, 11, float3(theta, theta, 0.0f), 0.8f, false, false);
+	run_simulation(si_u, 11, float3(theta, theta, 0.0f), 0.8f, false, true);
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> elapsed = end - start;
 	// print out the time
 	std::cout << "Time: " << elapsed.count() << "s\n";
 }/**/ 
+
+void main_setup(){
+	
+	float si_u = 100.00f;
+	run_simulation_2d(si_u, 1, 0.8f, true, true);
+
+}
+
 
 
 #ifdef BENCHMARK
@@ -161,12 +169,12 @@ void main_setup() { // benchmark; required extensions in defines.hpp: BENCHMARK,
 		}
 #endif // D2Q9
 		if(sqrt(error_dif/error_sum)>=error_min) { // stop when error has converged
-			print_info("Poiseuille flow error converged after "+to_string(lbm.get_t())+" steps to "+to_string(100.0*error_min, 3u)+"%"); // typical expected L2 errors: 2-5% (Krüger p. 256)
+			print_info("Poiseuille flow error converged after "+std::to_string(lbm.get_t())+" steps to "+to_string(100.0*error_min, 3u)+"%"); // typical expected L2 errors: 2-5% (Krüger p. 256)
 			wait();
 			exit(0);
 		}
 		error_min = fmin(error_min, sqrt(error_dif/error_sum));
-		print_info("Poiseuille flow error after t="+to_string(lbm.get_t())+" is "+to_string(100.0*error_min, 3u)+"%"); // typical expected L2 errors: 2-5% (Krüger p. 256)
+		print_info("Poiseuille flow error after t="+std::to_string(lbm.get_t())+" is "+to_string(100.0*error_min, 3u)+"%"); // typical expected L2 errors: 2-5% (Krüger p. 256)
 	}
 } /**/
 
