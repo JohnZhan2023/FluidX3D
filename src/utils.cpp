@@ -284,7 +284,7 @@ void run_simulation(float si_u, int id, float3 rotation, float size, bool is_tra
 
         float dt = units.si_t(1ul); // 1 LBM步对应的真实时间，单位是秒
         print_info("dt = " + std::to_string(dt));
-        float slow_down = 20.0f; 
+        float slow_down = 40.0f; 
         int frequency = (int)((1/24.0)/dt/slow_down); // 24fps
         // int frequency = 1;
         print_info("frequency = " + std::to_string(frequency));

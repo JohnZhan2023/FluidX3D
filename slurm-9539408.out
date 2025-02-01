@@ -1,0 +1,64 @@
+SLURM_JOBID=9539408
+SLURM_JOB_NAME=neural_wind_tunnel
+SLURM_JOB_NODELIST=viscam11
+SLURM_NNODES=1
+SLURMTMPDIR=
+working directory = /viscam/projects/neural_wind_tunnel/FluidX3D
+[92mInfo[0m: Detected Operating System: Linux
+[92mInfo[0m: Compiling with 64 CPU cores.
+g++ -c src/graphics.cpp -o temp/graphics.o -std=c++17 -pthread -O -Wno-comment 
+g++ -c src/info.cpp -o temp/info.o -std=c++17 -pthread -O -Wno-comment -I./src/OpenCL/include
+g++ -c src/lbm.cpp -o temp/lbm.o -std=c++17 -pthread -O -Wno-comment -I./src/OpenCL/include
+g++ -c src/main.cpp -o temp/main.o -std=c++17 -pthread -O -Wno-comment -I./src/OpenCL/include
+g++ -c src/setup.cpp -o temp/setup.o -std=c++17 -pthread -O -Wno-comment -I./src/OpenCL/include
+g++ -c src/utils.cpp -o temp/utils.o -std=c++17 -pthread -O -Wno-comment -I./src/OpenCL/include
+g++ temp/*.o -o bin/FluidX3D -std=c++17 -pthread -O -Wno-comment -I./src/OpenCL/include -L./src/OpenCL/lib -lOpenCL  
+/usr/bin/ld: temp/graphics.o: in function `key_linux(int)':
+graphics.cpp:(.text+0x263a): undefined reference to `XkbKeycodeToKeysym'
+/usr/bin/ld: temp/graphics.o: in function `update_frame(double)':
+graphics.cpp:(.text+0x28b5): undefined reference to `XLockDisplay'
+/usr/bin/ld: graphics.cpp:(.text+0x28f4): undefined reference to `XPutImage'
+/usr/bin/ld: graphics.cpp:(.text+0x2918): undefined reference to `XUnlockDisplay'
+/usr/bin/ld: graphics.cpp:(.text+0x295b): undefined reference to `XWarpPointer'
+/usr/bin/ld: temp/graphics.o: in function `hide_cursor()':
+graphics.cpp:(.text+0x29b5): undefined reference to `XCreateBitmapFromData'
+/usr/bin/ld: graphics.cpp:(.text+0x29f1): undefined reference to `XCreatePixmapCursor'
+/usr/bin/ld: graphics.cpp:(.text+0x2a0e): undefined reference to `XDefineCursor'
+/usr/bin/ld: graphics.cpp:(.text+0x2a1d): undefined reference to `XFreeCursor'
+/usr/bin/ld: graphics.cpp:(.text+0x2a2c): undefined reference to `XFreePixmap'
+/usr/bin/ld: temp/graphics.o: in function `show_cursor()':
+graphics.cpp:(.text+0x2a5c): undefined reference to `XCreateFontCursor'
+/usr/bin/ld: graphics.cpp:(.text+0x2a75): undefined reference to `XDefineCursor'
+/usr/bin/ld: graphics.cpp:(.text+0x2a84): undefined reference to `XFreeCursor'
+/usr/bin/ld: temp/graphics.o: in function `input_detection()':
+graphics.cpp:(.text+0x392a): undefined reference to `XNextEvent'
+/usr/bin/ld: graphics.cpp:(.text+0x3ac1): undefined reference to `XWarpPointer'
+/usr/bin/ld: graphics.cpp:(.text+0x3b67): undefined reference to `XWarpPointer'
+/usr/bin/ld: temp/graphics.o: in function `main':
+graphics.cpp:(.text+0x3ce1): undefined reference to `XInitThreads'
+/usr/bin/ld: graphics.cpp:(.text+0x3ceb): undefined reference to `XOpenDisplay'
+/usr/bin/ld: graphics.cpp:(.text+0x3d1c): undefined reference to `XRRGetScreenResources'
+/usr/bin/ld: graphics.cpp:(.text+0x3d2e): undefined reference to `XRRGetOutputPrimary'
+/usr/bin/ld: graphics.cpp:(.text+0x3d40): undefined reference to `XRRGetOutputInfo'
+/usr/bin/ld: graphics.cpp:(.text+0x3d5d): undefined reference to `XRRGetCrtcInfo'
+/usr/bin/ld: graphics.cpp:(.text+0x3d6f): undefined reference to `XRRGetScreenInfo'
+/usr/bin/ld: graphics.cpp:(.text+0x3d8b): undefined reference to `XRRConfigCurrentRate'
+/usr/bin/ld: graphics.cpp:(.text+0x3d9a): undefined reference to `XRRFreeScreenConfigInfo'
+/usr/bin/ld: graphics.cpp:(.text+0x3da2): undefined reference to `XRRFreeCrtcInfo'
+/usr/bin/ld: graphics.cpp:(.text+0x3dac): undefined reference to `XRRFreeOutputInfo'
+/usr/bin/ld: graphics.cpp:(.text+0x3db6): undefined reference to `XRRFreeScreenResources'
+/usr/bin/ld: graphics.cpp:(.text+0x4454): undefined reference to `XCreateWindow'
+/usr/bin/ld: graphics.cpp:(.text+0x44f5): undefined reference to `XSetNormalHints'
+/usr/bin/ld: graphics.cpp:(.text+0x453d): undefined reference to `XInternAtom'
+/usr/bin/ld: graphics.cpp:(.text+0x456a): undefined reference to `XChangeProperty'
+/usr/bin/ld: graphics.cpp:(.text+0x4588): undefined reference to `XStoreName'
+/usr/bin/ld: graphics.cpp:(.text+0x459b): undefined reference to `XMapRaised'
+/usr/bin/ld: graphics.cpp:(.text+0x45b8): undefined reference to `XCreateGC'
+/usr/bin/ld: graphics.cpp:(.text+0x45fe): undefined reference to `XCreateImage'
+/usr/bin/ld: graphics.cpp:(.text+0x4621): undefined reference to `XSelectInput'
+/usr/bin/ld: graphics.cpp:(.text+0x4679): undefined reference to `XWarpPointer'
+/usr/bin/ld: graphics.cpp:(.text+0x52f7): undefined reference to `XFreeGC'
+/usr/bin/ld: graphics.cpp:(.text+0x531f): undefined reference to `XDestroyWindow'
+/usr/bin/ld: graphics.cpp:(.text+0x532b): undefined reference to `XCloseDisplay'
+collect2: error: ld returned 1 exit status
+make: *** [makefile:25: bin/FluidX3D] Error 1
