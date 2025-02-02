@@ -1,6 +1,9 @@
 #include "utils.hpp"
 
 
+#include <random>
+#include <vector>
+#include <cmath>
 
 float3x3 rotation_matrix(float3 rotation_angle){
     float3x3 rotation_matrix;
@@ -190,7 +193,7 @@ string id2object(int id, float3 rotation_angle, LBM & lbm, float size) {
 }
 
 void create_dataset(uint frequency,bool is_train, LBM &lbm, string prompt){
-    string original_path = "./";
+    string original_path = "/viscam/projects/neural_wind_tunnel/EXP/data_generation/";
     // string original_path = "C:\\Users\\86177\\Desktop\\workspace\\EXP\\data_generation\\";
 
     const uint star_T = 10000u; // number of LBM time steps to simulate
@@ -296,7 +299,7 @@ void run_simulation(float si_u, int id, float3 rotation, float size, bool is_tra
 }
 
 void create_dataset_2d(uint frequency,bool is_train, LBM &lbm, string prompt){
-    string original_path = "./";
+    string original_path = "/viscam/projects/neural_wind_tunnel/EXP/data_generation/";
     // string original_path = "C:\\Users\\86177\\Desktop\\workspace\\EXP\\data_generation\\";
 
     const uint star_T = 100000u; // number of LBM time steps to simulate
@@ -323,7 +326,7 @@ void create_dataset_2d(uint frequency,bool is_train, LBM &lbm, string prompt){
     90.0f,   // 相机朝向的俯仰角度 (pitch)
     50.0f   // 相机视距
     );
-    lbm.graphics.write_frame(original_path + "SynData_2D/" + folder + "/images/" + object_id_str + "-"); // export image from camera position
+    lbm.graphics.write_frame(original_path + "SynData_2D_random/" + folder + "/images/" + object_id_str + "-"); // export image from camera position
     lbm.run(star_T, lbm_T); // initialize simulation
 
 	while(lbm.get_t()<lbm_T) { // main simulation loop
@@ -336,106 +339,95 @@ void create_dataset_2d(uint frequency,bool is_train, LBM &lbm, string prompt){
 				50.0f   // 相机视距
 			);
 			// 生成完整的路径
-			std::string camera_path = original_path + "SynData_2D/" + folder + "/images/" + object_id_str + "/";
+			std::string camera_path = original_path + "SynData_2D_random/" + folder + "/images/" + object_id_str + "/";
 			// MAKE_DIR(camera_path);
 			lbm.graphics.write_frame(camera_path); // export image from camera position 
 		}
 		lbm.run(frequency, lbm_T); // run 1 LBM time step
 	}
 	// open the SynData/" + folder + "/videos.txt/prompts.txt write the prompt
-	std::ofstream file(original_path + "SynData_2D/" + folder + "/prompts.txt", std::ios::app);
+	std::ofstream file(original_path + "SynData_2D_random/" + folder + "/prompts.txt", std::ios::app);
 	file <<  prompt + "\n";
 	file.close();
 	// open the SynData/" + folder + "/videos.txt/videos.txt write the video path
-	std::ofstream file1(original_path + "SynData_2D/" + folder + "/videos.txt", std::ios::app);
+	std::ofstream file1(original_path + "SynData_2D_random/" + folder + "/videos.txt", std::ios::app);
 	file1 <<"videos/" + object_id_str + ".mp4\n";
 	file1.close();
 
     // open the SynData/" + folder + "/videos.txt/images.txt write the video path
-    std::ofstream file2(original_path + "SynData_2D/" + folder + "/images.txt", std::ios::app);
+    std::ofstream file2(original_path + "SynData_2D_random/" + folder + "/images.txt", std::ios::app);
     file2 << "images/" + object_id_str + "-" + "image-000000000.png\n";
     file2.close();
 }
+std::vector<std::pair<float, float>> generate_random_vertices(float size, uint Nx, uint Ny) {
+    std::vector<std::pair<float, float>> vertices;
+    // 定义随机数生成器
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> vertex_count_dis(3, 60);
+    int vertex_count = vertex_count_dis(gen);
 
-bool id2object_2d(int id, int x, int y, int z, LBM &lbm, float size, string &prompt) {
-    float3 obj_center = float3(lbm.get_Nx()/2, lbm.get_Ny()/2, lbm.get_Nz()/2);
-    switch(id) {
-        case 0:
-            prompt = "(Cylinder) Visualize the VIS_FIELD of the cylinder to represent the 2D turbulent flow field of the object in the given image.";
-            return cylinder(x, y, z, obj_center, float3(0u, 0u, lbm.get_Nz()), size);
-        case 1:
-            prompt = "(Sphere) Visualize the VIS_FIELD of the sphere to represent the 2D turbulent flow field of the object in the given image.";
-            return sphere(x, y, z, obj_center, size);
-        case 2:
-            prompt = "(Ellipsoid) Visualize the VIS_FIELD of the ellipsoid to represent the 2D turbulent flow field of the object in the given image.";
-            return ellipsoid(x, y, z, obj_center, float3(size, size, size/2));
-        case 3:
-            prompt = "(Cube) Visualize the VIS_FIELD of the cube to represent the 2D turbulent flow field of the object in the given image.";
-            return cube(x, y, z, obj_center, size);
-        case 4:
-            prompt = "(Cuboid) Visualize the VIS_FIELD of the cuboid to represent the 2D turbulent flow field of the object in the given image.";
-            return cuboid(x, y, z, obj_center, float3(size, size/2, size/2));
-        case 5:
-            prompt = "(Cone) Visualize the VIS_FIELD of the cone to represent the 2D turbulent flow field of the object in the given image.";
-            return cone(x, y, z, obj_center, float3(0u, 0u, lbm.get_Nz()), size, size/2);
-        case 6:
-            prompt = "(Pipe) Visualize the VIS_FIELD of the pipe to represent the 2D turbulent flow field of the object in the given image.";
-            return pipe(x, y, z, obj_center, float3(0u, 0u, lbm.get_Nz()), size);
-        case 7:
-            prompt = "(Cone Pipe) Visualize the VIS_FIELD of the cone pipe to represent the 2D turbulent flow field of the object in the given image.";
-            return conepipe(x, y, z, obj_center, float3(0u, 0u, lbm.get_Nz()), size, size/2);
-        case 8:
-            prompt = "(Triangle) Visualize the VIS_FIELD of the triangle to represent the 2D turbulent flow field of the object in the given image.";
-            return triangle(x, y, z, obj_center, float3(obj_center.x + size, obj_center.y, obj_center.z), float3(obj_center.x, obj_center.y + size, obj_center.z));
-        case 9:
-            prompt = "(Plane) Visualize the VIS_FIELD of the plane to represent the 2D turbulent flow field of the object in the given image.";
-            return plane(x, y, z, obj_center, float3(0u, 1u, 0u));
-        case 10:
-            prompt = "(Torus X) Visualize the VIS_FIELD of the torus (X-axis) to represent the 2D turbulent flow field of the object in the given image.";
-            return torus_x(x, y, z, obj_center, size/2, size);
-        case 11:
-            prompt = "(Torus Y) Visualize the VIS_FIELD of the torus (Y-axis) to represent the 2D turbulent flow field of the object in the given image.";
-            return torus_y(x, y, z, obj_center, size/2, size);
-        case 12:
-            prompt = "(Torus Z) Visualize the VIS_FIELD of the torus (Z-axis) to represent the 2D turbulent flow field of the object in the given image.";
-            return torus_z(x, y, z, obj_center, size/2, size);
-        default:
-            prompt = "Invalid ID.";
-            return false;
+    // 为多边形的中心位置去除随机性
+    float center_x = Nx / 2;
+    float center_y = Ny / 2;
+
+    // 为多边形的size添加随机性
+    std::uniform_real_distribution<float> size_variation_dis(0.8f, 1.2f);
+    float random_size = size * size_variation_dis(gen);
+
+    // 生成凸多边形的顶点
+    for (int i = 0; i < vertex_count; ++i) {
+        float angle = 2 * M_PI * i / vertex_count; // 均匀分布的角度
+        std::uniform_real_distribution<float> radius_dis(0.5f * random_size, random_size);
+        float radius = radius_dis(gen);
+        float px = center_x + radius * cos(angle);
+        float py = center_y + radius * sin(angle);
+        vertices.emplace_back(px, py);
     }
+    return vertices;
+}
+
+bool is_point_inside_polygon(uint x, uint y, const std::vector<std::pair<float, float>>& vertices) {
+    bool inside = false;
+    int i, j;
+    int vertex_count = vertices.size();
+    for (i = 0, j = vertex_count - 1; i < vertex_count; j = i++) {
+        if (((vertices[i].second > y) != (vertices[j].second > y)) &&
+            (x < (vertices[j].first - vertices[i].first) * (y - vertices[i].second) / (vertices[j].second - vertices[i].second) + vertices[i].first)) {
+            inside = !inside;
+        }
+    }
+    return inside;
 }
 
 void run_simulation_2d(float si_u, int id, float size, bool is_train, bool render = true) {
     uint3 lbm_N = resolution(float3(1.0f, 2.0f, 0.01f), 1000u); // input: simulation box aspect ratio and VRAM occupation in MB, output: grid resolution
-	// set the third dimension to 1u to make the simulation 2D
+    // set the third dimension to 1u to make the simulation 2D
     lbm_N.z = 1u;
     const float si_length = 2.4f;
-	// const float si_T = 10.0f;
-	const float si_nu=1.48E-5f, si_rho=1.225f;
-	const float lbm_length = 0.65f*(float)lbm_N.y; // length of the simulation box in lbm
-	const float lbm_u = 0.055f; // velocity of the fluid in lbm
-	units.set_m_kg_s(lbm_length, lbm_u, 1.0f, si_length, si_u, si_rho);        
-	const float lbm_nu = units.nu(si_nu);
-	// const ulong lbm_T = units.t(si_T);
-	print_info("Re = "+std::to_string(to_uint(units.si_Re(si_length, si_u, si_nu))));
+    const float si_nu=1.48E-5f, si_rho=1.225f;
+    const float lbm_length = 0.65f*(float)lbm_N.y; // length of the simulation box in lbm
+    const float lbm_u = 0.055f; // velocity of the fluid in lbm
+    units.set_m_kg_s(lbm_length, lbm_u, 1.0f, si_length, si_u, si_rho);        
+    const float lbm_nu = units.nu(si_nu);
+    print_info("Re = "+std::to_string(to_uint(units.si_Re(si_length, si_u, si_nu))));
     // initialize the LBM object
-	LBM lbm(lbm_N, lbm_nu);
+    LBM lbm(lbm_N, lbm_nu);
     const uint Nx=lbm.get_Nx(), Ny=lbm.get_Ny(), Nz=lbm.get_Nz();
     size = size * Nx/4;
     float3 rotation = float3(0.0f, 0.0f, 0.0f);
-    string prompt = id2object(id, rotation, lbm, size);
-    // string prompt;
 
     // find the boundary location
     const uint Nx_1 = Nx - 1;
     const uint Ny_1 = Ny - 1;
     const uint Nz_1 = Nz - 1;
+    string prompt = "(" + std::to_string(id) + ") Visualize the VIS_FIELD of the random shape to represent the 2D turbulent flow field of the object in the given image.";
+    std::vector<std::pair<float, float>> vertices = generate_random_vertices(size, Nx, Ny);
     parallel_for(lbm.get_N(), [&](ulong n) { uint x=0u, y=0u, z=0u; lbm.coordinates(n, x, y, z);
-		//if(z==0u) lbm.flags[n] = TYPE_S; // solid floor
-		if(lbm.flags[n]!=TYPE_S) lbm.u.y[n] = lbm_u; // initialize y-velocity everywhere except in solid cells
-		// if(id2object_2d(id, x, y, z, lbm, size, prompt)) lbm.flags[n] = TYPE_S;        
-		if(x==0u||x==Nx-1u||y==0u||y==Ny-1u) lbm.flags[n] = TYPE_E; // all other simulation box boundaries are inflow/outflow
-	}); // ####################################################################### run simulation, export images and data ##########################################################################
+        if(is_point_inside_polygon(x, y, vertices)) lbm.flags[n] = TYPE_S;
+        else lbm.u.y[n] = lbm_u;
+        if(x==0u||x==Nx-1u||y==0u||y==Ny-1u) {lbm.flags[n] = TYPE_E;} // all other simulation box boundaries are inflow/outflow
+    }); // ####################################################################### run simulation, export images and data ##########################################################################
     // set the Visualize flag
     lbm.graphics.visualization_modes = VIS_FIELD|VIS_FLAG_LATTICE;
     lbm.graphics.slice_mode = 3;
@@ -445,7 +437,6 @@ void run_simulation_2d(float si_u, int id, float size, bool is_train, bool rende
         print_info("dt = " + std::to_string(dt));
         float slow_down = 100.0f; 
         int frequency = (int)((1/24.0)/dt/slow_down); // 24fps
-        // int frequency = 1;
         print_info("frequency = " + std::to_string(frequency));
         create_dataset_2d(frequency, is_train, lbm, prompt);
     }else{

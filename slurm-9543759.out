@@ -1,0 +1,12 @@
+SLURM_JOBID=9543759
+SLURM_JOB_NAME=neural_wind_tunnel
+SLURM_JOB_NODELIST=viscam11
+SLURM_NNODES=1
+SLURMTMPDIR=
+working directory = /viscam/projects/neural_wind_tunnel/FluidX3D
+[92mInfo[0m: Detected Operating System: Linux
+[92mInfo[0m: Compiling with 64 CPU cores.
+g++ -c src/setup.cpp -o temp/setup.o -std=c++17 -pthread -O -Wno-comment -I./src/OpenCL/include
+g++ -c src/utils.cpp -o temp/utils.o -std=c++17 -pthread -O -Wno-comment -I./src/OpenCL/include
+g++ temp/*.o -o bin/FluidX3D -std=c++17 -pthread -O -Wno-comment -I./src/OpenCL/include -L./src/OpenCL/lib -lOpenCL  
+/var/lib/slurm/slurmd/job9543759/slurm_script: line 87: 1050156 Segmentation fault      (core dumped) bin/FluidX3D "$@"

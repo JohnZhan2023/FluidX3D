@@ -1,0 +1,10 @@
+SLURM_JOBID=9544717
+SLURM_JOB_NAME=neural_wind_tunnel
+SLURM_JOB_NODELIST=viscam11
+SLURM_NNODES=1
+SLURMTMPDIR=
+working directory = /viscam/projects/neural_wind_tunnel/FluidX3D
+[92mInfo[0m: Detected Operating System: Linux
+[92mInfo[0m: Compiling with 64 CPU cores.
+g++ -c src/setup.cpp -o temp/setup.o -std=c++17 -pthread -O -Wno-comment -I./src/OpenCL/include
+g++ temp/*.o -o bin/FluidX3D -std=c++17 -pthread -O -Wno-comment -I./src/OpenCL/include -L./src/OpenCL/lib -lOpenCL  
