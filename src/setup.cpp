@@ -30,7 +30,7 @@
 void main_setup(){
 	
 	float si_u = 100.00f;
-	for (int object_id = 0; object_id < 300; object_id++){
+	for (int object_id = 120; object_id < 300; object_id++){
 		run_simulation_2d(si_u, object_id, 0.8f, true, true);
 	}
 	// for the validation set
